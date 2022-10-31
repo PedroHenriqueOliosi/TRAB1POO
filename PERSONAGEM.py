@@ -1,46 +1,50 @@
 import pygame as pg
 from CONFIG_PERSONAGEM import ConfigPersonagem
-import math as mt
 
 class Personagem:
     def __init__(self, posicao):
         self.posicao = posicao
         self.velocidade = 0 
 
-    def mover_positivo(self):
+    def mover_cima(self):
         self.velocidade = ConfigPersonagem.VEL_PERSONAGEM
 
-    def mover_negativo(self):
+        x,y = self.posicao
+        novo_y = y + self.velocidade
+
+        if (novo_y >= ConfigPersonagem.RAIO_PERSONAGEM) and ((novo_y + ConfigPersonagem.RAIO_PERSONAGEM) <= ConfigPersonagem.SCREEN_HEIGHT ):
+                self.posicao = (x,novo_y)
+        
+    def mover_esquerda(self):
         self.velocidade = -ConfigPersonagem.VEL_PERSONAGEM
-    
-    def mover_positivo_diagonal(self):
-        self.velocidade = ConfigPersonagem.VEL_PERSONAGEM / mt.sqrt(2)
 
-    def mover_negativo_diagonal(self):
-        self.velocidade = -(ConfigPersonagem.VEL_PERSONAGEM / mt.sqrt(2))
-        
-        
-    
-    def parar(self):
-        self.velocidade = 0
-
-    def atualizar_posx(self):
         x,y = self.posicao
         novo_x = x + self.velocidade
 
         if (novo_x >= ConfigPersonagem.RAIO_PERSONAGEM) and ((novo_x + ConfigPersonagem.RAIO_PERSONAGEM) <= ConfigPersonagem.SCREEN_WIDTH ):
                 self.posicao = (novo_x,y)
         
-   
-    def atualizar_posy(self):
+    
+    def mover_baixo(self):
+        self.velocidade = ConfigPersonagem.VEL_PERSONAGEM 
+
         x,y = self.posicao
         novo_y = y + self.velocidade
 
         if (novo_y >= ConfigPersonagem.RAIO_PERSONAGEM) and ((novo_y + ConfigPersonagem.RAIO_PERSONAGEM) <= ConfigPersonagem.SCREEN_HEIGHT ):
                 self.posicao = (x,novo_y)
-    
-   
 
+    def mover_direita(self):
+        self.velocidade = ConfigPersonagem.VEL_PERSONAGEM 
+
+        x,y = self.posicao
+        novo_x = x + self.velocidade
+
+        if (novo_x >= ConfigPersonagem.RAIO_PERSONAGEM) and ((novo_x + ConfigPersonagem.RAIO_PERSONAGEM) <= ConfigPersonagem.SCREEN_WIDTH ):
+                self.posicao = (novo_x,y)
+    
+    def parar(self):
+        self.velocidade = 0  
 
     def desenho(self, screen):
         x = self.posicao[0]
@@ -57,3 +61,4 @@ class Personagem:
 
     def tiro(self):
         pass
+
