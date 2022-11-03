@@ -9,6 +9,5 @@ class ConfigPersonagem:
     POSX_PERSONAGEM = SCREEN_WIDTH / 2 
     POSY_PERSONAGEM = SCREEN_HEIGHT / 2 
     COR_PERSONAGEM = 'blue'
-    VEL_PERSONAGEM = 10
     
     
