@@ -21,18 +21,45 @@ class Jogo:
             self.desenha()
     
     def eventos(self):
-       pressed = pg.key.get_pressed()
+        pg.event.get()
 
-       dic = {
-           pg.K_w : self.player.mover_cima(),
-           pg.K_a : self.player.mover_esquerda(),
-           pg.K_s : self.player.mover_baixo(),
-           pg.K_d : self.player.mover_direita()
-       }
+        keys = pg.key.get_pressed()
+        if keys[pg.K_ESCAPE]:
+            sys.exit(0)
 
-       for k, fn in dic.items():
-           if(pressed[k]) or (pg.event.type == pg.KEYDOWN and pg.event.key == k):
-              fn()
+        if keys[pg.K_w]:
+            self.player.mover_cima(10)
+
+        elif keys[pg.K_d]:
+            self.player.mover_direita(10)
+            
+        elif keys[pg.K_s]:
+            self.player.mover_baixo(10)
+            
+        elif keys[pg.K_a]:
+            self.player.mover_esquerda(10)
+            
+        else:
+            self.player.parar(0)
+
+        if keys[pg.K_w] and keys[pg.K_d]:   #x+ y-
+            self.player.mover_cima(5)
+            self.player.mover_direita(5)
+            
+        elif keys[pg.K_w] and keys[pg.K_a]: #x- y-
+            self.player.mover_cima(5)
+            self.player.mover_esquerda(5)
+            
+        elif keys[pg.K_s] and keys[pg.K_d]: #x+ y+
+            self.player.mover_baixo(10)
+            self.player.mover_direita(1000)
+
+        elif keys[pg.K_s] and keys[pg.K_a]: #x- y+
+            self.player.mover_baixo(5)
+            self.player.mover_esquerda(5)
+            
+        else:
+            self.player.parar(0)
 
     def desenha(self):
         self.screen.fill('white')
