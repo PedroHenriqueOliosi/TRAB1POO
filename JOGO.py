@@ -1,4 +1,3 @@
-import sys
 import pygame as pg
 
 from CONFIG_PERSONAGEM import ConfigPersonagem
@@ -10,61 +9,31 @@ class Jogo:
         self.screen = pg.display.set_mode(
             (ConfigPersonagem.SCREEN_WIDTH, ConfigPersonagem.SCREEN_HEIGHT))
 
-        px = ConfigPersonagem.POSX_PERSONAGEM
-        py = ConfigPersonagem.POSY_PERSONAGEM
+        self.px = ConfigPersonagem.POSX_PERSONAGEM
+        self.py = ConfigPersonagem.POSY_PERSONAGEM
         
-        self.player = Personagem(posicao=(px,py))
+        self.player = pg.sprite.GroupSingle()
+        self.player.add(Personagem(posicao=(self.px,self.py)))
+
         self.clock = pg.time.Clock()
+
     def run(self):
         while True:
-            self.eventos()
             self.desenha()
-    
-    def eventos(self):
-        pg.event.get()
-
-        keys = pg.key.get_pressed()
-        if keys[pg.K_ESCAPE]:
-            sys.exit(0)
-
-        if keys[pg.K_w]:
-            self.player.mover_cima(10)
-
-        elif keys[pg.K_d]:
-            self.player.mover_direita(10)
-            
-        elif keys[pg.K_s]:
-            self.player.mover_baixo(10)
-            
-        elif keys[pg.K_a]:
-            self.player.mover_esquerda(10)
-            
-        else:
-            self.player.parar(0)
-
-        if keys[pg.K_w] and keys[pg.K_d]:   #x+ y-
-            self.player.mover_cima(5)
-            self.player.mover_direita(5)
-            
-        elif keys[pg.K_w] and keys[pg.K_a]: #x- y-
-            self.player.mover_cima(5)
-            self.player.mover_esquerda(5)
-            
-        elif keys[pg.K_s] and keys[pg.K_d]: #x+ y+
-            self.player.mover_baixo(10)
-            self.player.mover_direita(1000)
-
-        elif keys[pg.K_s] and keys[pg.K_a]: #x- y+
-            self.player.mover_baixo(5)
-            self.player.mover_esquerda(5)
-            
-        else:
-            self.player.parar(0)
 
     def desenha(self):
+        
         self.screen.fill('white')
-        self.player.desenho(self.screen)
-        self.player.desenho(self.screen)
+        
+        self.player_surf = pg.image.load('C:\POO\TRAB_1\patrick.png').convert_alpha()
+        self.player_surf = pg.transform.scale(self.player_surf, ConfigPersonagem.TAMANHO)
+        self.player_rect = self.player_surf.get_rect(topleft = (self.px,self.py))
+
+        self.screen.blit(self.player_surf,self.player_rect)
+        
+        pg.display.update()
+        self.player.draw(self.screen)
+        self.player.update()
         pg.display.flip()
         self.clock.tick(ConfigPersonagem.FPS)
         
