@@ -1,7 +1,8 @@
 import pygame as pg
 
-from CONFIG_PERSONAGEM import ConfigPersonagem
-from PERSONAGEM import Personagem
+from CONFIG_PERSONAGEM import *
+from PERSONAGEM import *
+from TIRO import *
 
 class Jogo:
     def __init__(self):
@@ -15,27 +16,34 @@ class Jogo:
         self.player = pg.sprite.GroupSingle()
         self.player.add(Personagem(posicao=(self.px,self.py)))
 
+        self.tiro = pg.sprite.Group()
+
         self.clock = pg.time.Clock()
 
     def run(self):
         while True:
+            self.eventos()
             self.desenha()
+
+    def eventos(self):
+        self.keys = pg.key.get_pressed()
+
+        if self.keys[pg.K_SPACE]:
+            self.tiro.add(Tiro(posicao= (self.px,self.py)))
 
     def desenha(self):
         
+        self.clock.tick(ConfigPersonagem.FPS)
         self.screen.fill('white')
         
-        self.player_surf = pg.image.load('C:\POO\TRAB_1\patrick.png').convert_alpha()
-        self.player_surf = pg.transform.scale(self.player_surf, ConfigPersonagem.TAMANHO)
-        self.player_rect = self.player_surf.get_rect(topleft = (self.px,self.py))
-
-        self.screen.blit(self.player_surf,self.player_rect)
-        
-        pg.display.update()
-        self.player.draw(self.screen)
         self.player.update()
-        pg.display.flip()
-        self.clock.tick(ConfigPersonagem.FPS)
+        self.player.draw(self.screen)
+
+        self.tiro.update()
+        self.tiro.draw(self.screen)
+
+        pg.display.update()
+        
         
 
 def main():
