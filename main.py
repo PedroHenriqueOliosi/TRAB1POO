@@ -10,16 +10,22 @@ class Game:
         self.clock = pg.time.Clock()
         self.running = True
 
+        self.character_spritesheet = Spritesheet('C:\POO\TRAB_1\character.png')
+        self.terrain_spritesheet = Spritesheet('C:\POO\TRAB_1\Terrain.png')
+        self.enemy_spritesheet = Spritesheet('C:\POO\TRAB_1\enemy.png')
+
     def createTilemap(self):
         for i, row in enumerate(tilemap):
             for j, column in enumerate(row):
+                Ground(self, j, i)
                 if column == "B":
                     Block(self, j, i)
+                if column == "E":
+                    Enemy(self, j, i)
                 if column == "P":
                     Player(self, j, i)
 
     def new(self):
-        self.createTilemap()
         #a new game starts
         self.playing = True
 
@@ -33,7 +39,8 @@ class Game:
     def events(self):
         #game loop events
         for event in pg.event.get():
-            if event.type == pg.QUIT:
+            keys = pg.key.get_pressed()
+            if event.type == pg.QUIT or keys[pg.K_ESCAPE]:
                 self.playing = False
                 self.running = False
     
