@@ -148,6 +148,29 @@ class Player(pg.sprite.Sprite):
                 if self.animation_loop >= 3:
                     self.animation_loop = 1
 
+class Player2(Player):
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y)
+
+    def movement(self):
+        keys = pg.key.get_pressed()
+        if keys[pg.K_j]:
+             self.x_change -= PLAYER_SPEED
+             self.facing = 'left'
+             print(self.facing)
+        if keys[pg.K_l]:
+             self.x_change += PLAYER_SPEED
+             self.facing = 'right'
+             print(self.facing)
+        if keys[pg.K_k]:
+             self.y_change += PLAYER_SPEED
+             self.facing = 'down'
+             print(self.facing)
+        if keys[pg.K_i]:
+             self.y_change -= PLAYER_SPEED
+             self.facing = 'up'
+             print(self.facing)
+
 class Enemy(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.game = game
@@ -293,9 +316,10 @@ class Button:
         return False
 
 class Attack(pg.sprite.Sprite):
-    def __init__(self, game, x, y):
+    def __init__(self, game, x, y, player):
         self.game = game
         self._layer = PLAYER_LAYER
+        self.player = player
         self.groups = self.game.all_sprites, self.game.attacks
         pg.sprite.Sprite.__init__(self, self.groups)
 
@@ -314,6 +338,7 @@ class Attack(pg.sprite.Sprite):
 
     def update(self):
         self.animate()
+        self.animate()
         self.collide()
 
     def collide(self):
@@ -321,6 +346,7 @@ class Attack(pg.sprite.Sprite):
 
     def animate(self):
         direction = self.game.player.facing
+        direction2 = self.game.player2.facing
 
         right_animations = [self.game.attack_spritesheet.get_sprite(0, 64, self.width, self.height),
                            self.game.attack_spritesheet.get_sprite(32, 64, self.width, self.height),
@@ -345,27 +371,56 @@ class Attack(pg.sprite.Sprite):
                          self.game.attack_spritesheet.get_sprite(64, 0, self.width, self.height),
                          self.game.attack_spritesheet.get_sprite(96, 0, self.width, self.height),
                          self.game.attack_spritesheet.get_sprite(128, 0, self.width, self.height)]
-
-        if direction == 'up':
-            self.image = up_animations[math.floor(self.animation_loop)]
-            self.animation_loop += 0.5
-            if self.animation_loop >= 5:
-                self.kill()
         
-        if direction == 'down':
-            self.image = down_animations[math.floor(self.animation_loop)]
-            self.animation_loop += 0.5
-            if self.animation_loop >= 5:
-                self.kill()
+        if self.player == self.game.player:
+            if direction == 'up':
+                self.image = up_animations[math.floor(self.animation_loop)]
+                self.animation_loop += 0.5
+                if self.animation_loop >= 5:
+                    self.kill()
+            
+            if direction == 'down':
+                self.image = down_animations[math.floor(self.animation_loop)]
+                self.animation_loop += 0.5
+                if self.animation_loop >= 5:
+                    self.kill()
 
-        if direction == 'left':
-            self.image = left_animations[math.floor(self.animation_loop)]
-            self.animation_loop += 0.5
-            if self.animation_loop >= 5:
-                self.kill()
+            if direction == 'left':
+                self.image = left_animations[math.floor(self.animation_loop)]
+                self.animation_loop += 0.5
+                if self.animation_loop >= 5:
+                    self.kill()
 
-        if direction == 'right':
-            self.image = right_animations[math.floor(self.animation_loop)]
-            self.animation_loop += 0.5
-            if self.animation_loop >= 5:
-                self.kill()
+            if direction == 'right':
+                self.image = right_animations[math.floor(self.animation_loop)]
+                self.animation_loop += 0.5
+                if self.animation_loop >= 5:
+                    self.kill()
+        
+        if self.player == self.game.player2:
+            if direction2 == 'up':
+                self.image = up_animations[math.floor(self.animation_loop)]
+                self.animation_loop += 0.5
+                if self.animation_loop >= 5:
+                    self.kill()
+            
+            if direction2 == 'down':
+                self.image = down_animations[math.floor(self.animation_loop)]
+                self.animation_loop += 0.5
+                if self.animation_loop >= 5:
+                    self.kill()
+
+            if direction2 == 'left':
+                self.image = left_animations[math.floor(self.animation_loop)]
+                self.animation_loop += 0.5
+                if self.animation_loop >= 5:
+                    self.kill()
+
+            if direction2 == 'right':
+                self.image = right_animations[math.floor(self.animation_loop)]
+                self.animation_loop += 0.5
+                if self.animation_loop >= 5:
+                    self.kill()
+        
+        
+        
