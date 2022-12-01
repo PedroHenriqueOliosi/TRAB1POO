@@ -53,24 +53,39 @@ class Player(pg.sprite.Sprite):
         self.x_change = 0
         self.y_change = 0
 
+    def moveup(self):
+        self.y_change -= PLAYER_SPEED
+        self.facing = 'up'
+        print(self.facing)
+    
+    def movedown(self):
+        self.y_change += PLAYER_SPEED
+        self.facing = 'down'
+        print(self.facing)
+
+    def moveleft(self):
+        self.x_change -= PLAYER_SPEED
+        self.facing = 'left'
+        print(self.facing)
+    
+    def moveright(self):
+        self.x_change += PLAYER_SPEED
+        self.facing = 'right'
+        print(self.facing)
+
     def movement(self):
         keys = pg.key.get_pressed()
-        if keys[pg.K_a]:
-             self.x_change -= PLAYER_SPEED
-             self.facing = 'left'
-             print(self.facing)
-        if keys[pg.K_d]:
-             self.x_change += PLAYER_SPEED
-             self.facing = 'right'
-             print(self.facing)
-        if keys[pg.K_s]:
-             self.y_change += PLAYER_SPEED
-             self.facing = 'down'
-             print(self.facing)
-        if keys[pg.K_w]:
-             self.y_change -= PLAYER_SPEED
-             self.facing = 'up'
-             print(self.facing)
+
+        self.commands = {
+            pg.K_w : self.moveup,
+            pg.K_s : self.movedown,
+            pg.K_a : self.moveleft,
+            pg.K_d : self.moveright
+        }
+
+        for k, fn in self.commands.items():
+            if keys[k]:
+                fn()
 
     def collide_enemies(self):
         hits = pg.sprite.spritecollide(self, self.game.enemies, False)
@@ -154,22 +169,17 @@ class Player2(Player):
 
     def movement(self):
         keys = pg.key.get_pressed()
-        if keys[pg.K_j]:
-             self.x_change -= PLAYER_SPEED
-             self.facing = 'left'
-             print(self.facing)
-        if keys[pg.K_l]:
-             self.x_change += PLAYER_SPEED
-             self.facing = 'right'
-             print(self.facing)
-        if keys[pg.K_k]:
-             self.y_change += PLAYER_SPEED
-             self.facing = 'down'
-             print(self.facing)
-        if keys[pg.K_i]:
-             self.y_change -= PLAYER_SPEED
-             self.facing = 'up'
-             print(self.facing)
+
+        self.commands = {
+            pg.K_i : self.moveup,
+            pg.K_k : self.movedown,
+            pg.K_j : self.moveleft,
+            pg.K_l : self.moveright
+        }
+
+        for k, fn in self.commands.items():
+            if keys[k]:
+                fn()
 
 class Enemy(pg.sprite.Sprite):
     def __init__(self, game, x, y):
@@ -286,7 +296,7 @@ class Ground(pg.sprite.Sprite):
 
 class Button:
     def __init__(self, x, y, width, height, fg, bg, content, fontsize):
-        self.font = pg.font.Font("fontinha_jogo.TTF", fontsize)
+        self.font = pg.font.Font("ibagens\Fontinha_jogo.TTF", fontsize)
 
         self.x = x
         self.y = y

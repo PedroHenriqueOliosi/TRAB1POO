@@ -23,14 +23,14 @@ class Game:
         self.running = True
         self.intro = True
         self.lore = True
-        self.font = pg.font.Font("fonte_jogo.TTF", 34)
-        self.little_font = pg.font.Font("fontinha_jogo.TTF", 14)
+        self.font = pg.font.Font("ibagens\Fonte_jogo.TTF", 34)
+        self.little_font = pg.font.Font("ibagens\Fontinha_jogo.TTF", 14)
 
-        self.character_spritesheet = Spritesheet('C:\POO\TRAB_1\character.png')
-        self.terrain_spritesheet = Spritesheet('C:\POO\TRAB_1\Terrain.png')
-        self.enemy_spritesheet = Spritesheet('C:\POO\TRAB_1\enemy.png')
-        self.attack_spritesheet = Spritesheet('C:\POO\TRAB_1\Attack.png')
-        self.intro_background = pg.image.load('introbackground.png')
+        self.character_spritesheet = Spritesheet('ibagens\character.png')
+        self.terrain_spritesheet = Spritesheet('ibagens\Terrain.png')
+        self.enemy_spritesheet = Spritesheet('ibagens\enemy.png')
+        self.attack_spritesheet = Spritesheet('ibagens\Attack.png')
+        self.intro_background = pg.image.load('ibagens\introbackground.png')
 
     def createTilemap(self):
         for i, row in enumerate(tilemap):
