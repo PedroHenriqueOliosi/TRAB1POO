@@ -1,5 +1,6 @@
 import pygame as pg
 from config import *
+from cronometro import * 
 import math
 import random
 
@@ -10,7 +11,8 @@ class Spritesheet:
     def get_sprite(self, x, y, width, height):
         sprite = pg.Surface([width, height])
         sprite.blit(self.sheet, (0,0), (x, y, width, height))
-        sprite.set_colorkey(BLACK)
+        sprite.set_colorkey(WHITE)
+        
         return sprite
 
 class Player(pg.sprite.Sprite):
@@ -44,36 +46,40 @@ class Player(pg.sprite.Sprite):
         self.movement()
         self.animate()
         self.collide_enemies()
+        self.collide_water()
 
         self.rect.x += self.x_change
         self.collide_blocks('x')
+        self.collide_obstacle('x')
         self.rect.y += self.y_change
         self.collide_blocks('y')
+        self.collide_obstacle('y')
 
         self.x_change = 0
         self.y_change = 0
 
     def moveup(self):
-        self.y_change -= PLAYER_SPEED
+        self.y_change -= self.speed
         self.facing = 'up'
         print(self.facing)
-    
+
     def movedown(self):
-        self.y_change += PLAYER_SPEED
+        self.y_change += self.speed
         self.facing = 'down'
         print(self.facing)
 
     def moveleft(self):
-        self.x_change -= PLAYER_SPEED
+        self.x_change -= self.speed
         self.facing = 'left'
         print(self.facing)
     
     def moveright(self):
-        self.x_change += PLAYER_SPEED
+        self.x_change += self.speed
         self.facing = 'right'
         print(self.facing)
 
     def movement(self):
+        self.speed = PLAYER_SPEED
         keys = pg.key.get_pressed()
 
         self.commands = {
@@ -95,7 +101,7 @@ class Player(pg.sprite.Sprite):
 
     def collide_blocks(self, direction):
         if direction == 'x':
-            hits = pg.sprite.spritecollide(self, self.game.blocks, False)
+            hits = pg.sprite.spritecollide(self, self.game.blocks, False) 
             if hits:
                 if self.x_change > 0:
                     self.rect.x = hits[0].rect.left - self.rect.width
@@ -109,6 +115,29 @@ class Player(pg.sprite.Sprite):
                     self.rect.y = hits[0].rect.top - self.rect.width
                 if self.y_change < 0:
                     self.rect.y = hits[0].rect.bottom    
+
+    def collide_obstacle(self, direction):
+        if direction == 'x':
+            hits = pg.sprite.spritecollide(self, self.game.obstacle, False) 
+            if hits:
+                if self.x_change > 0:
+                    self.rect.x = hits[0].rect.left - self.rect.width
+                if self.x_change < 0:
+                    self.rect.x = hits[0].rect.right 
+
+        if direction == 'y':
+            hits = pg.sprite.spritecollide(self, self.game.obstacle, False)
+            if hits:
+                if self.y_change > 0:
+                    self.rect.y = hits[0].rect.top - self.rect.width
+                if self.y_change < 0:
+                    self.rect.y = hits[0].rect.bottom    
+
+    def collide_water(self):
+        hits = pg.sprite.spritecollide(self, self.game.water, False)
+        if hits:
+            self.speed = 1
+            print(self.speed)
 
     def animate(self):
         down_animations = [self.game.character_spritesheet.get_sprite(3, 2, self.width, self.height),
@@ -168,6 +197,7 @@ class Player2(Player):
         super().__init__(game, x, y)
 
     def movement(self):
+        self.speed = PLAYER_SPEED
         keys = pg.key.get_pressed()
 
         self.commands = {
@@ -335,7 +365,7 @@ class Attack(pg.sprite.Sprite):
 
         self.x = x
         self.y = y
-        self.width = TILESIZE
+        self.width = TILESIZE 
         self.height = TILESIZE
 
         self.animation_loop = 0
@@ -348,11 +378,14 @@ class Attack(pg.sprite.Sprite):
 
     def update(self):
         self.animate()
-        self.animate()
-        self.collide()
-
-    def collide(self):
-        hits = pg.sprite.spritecollide(self, self.game.enemies, True)
+        self.collide_enemies()
+        self.collide_obstacles()
+            
+    def collide_enemies(self):
+        hits_enemies = pg.sprite.spritecollide(self, self.game.enemies, True)
+    
+    def collide_obstacles(self):
+        hits_obstacle = pg.sprite.spritecollide(self, self.game.obstacle, True)
 
     def animate(self):
         direction = self.game.player.facing
@@ -432,5 +465,98 @@ class Attack(pg.sprite.Sprite):
                 if self.animation_loop >= 5:
                     self.kill()
         
+class Obstacle(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.game = game
+        self._layer = BLOCK_LAYER
+        self.groups = self.game.all_sprites, self.game.obstacle
+        pg.sprite.Sprite.__init__(self, self.groups)
+
+        self.x = x * TILESIZE
+        self.y = y * TILESIZE
+        self.width = TILESIZE
+        self.height = TILESIZE
+
+        self.image = self.game.terrain_spritesheet.get_sprite(930, 480, self.width, self.height)
+
+        self.rect = self.image.get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
+
+class Water(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.game = game
+        self._layer = WATER_LAYER
+        self.groups = self.game.all_sprites, self.game.water
+        pg.sprite.Sprite.__init__(self, self.groups)
+
+        self.x = x * TILESIZE
+        self.y = y * TILESIZE
+        self.width = TILESIZE
+        self.height = TILESIZE
+
+        self.image = self.game.terrain_spritesheet.get_sprite(865, 160, self.width, self.height)
+        self.animation_loop = 0
+
+        self.rect = self.image.get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
+
+    def update(self):
+        self.animate()
+    
+    def animate(self):
+
+        animations = [self.game.terrain_spritesheet.get_sprite(865, 160, self.width, self.height),
+                      self.game.terrain_spritesheet.get_sprite(895, 160, self.width, self.height),
+                      self.game.terrain_spritesheet.get_sprite(925, 160, self.width, self.height)]
+
+        self.image = animations[math.floor(self.animation_loop)]
+        self.animation_loop += 0.01
+        if self.animation_loop >= 3:
+            self.animation_loop = 0
+
+class Explosion(pg.sprite.Sprite):
+    def __init__(self, game, x, y, player):
+        self.game = game
+        self._layer = PLAYER_LAYER
+        self.player = player
+        self.cronometro = Cronometro()
+        self.groups = self.game.all_sprites, self.game.explosion
+        pg.sprite.Sprite.__init__(self, self.groups)
+
+        self.x = x
+        self.y = y
+        self.width = TILESIZE 
+        self.height = TILESIZE 
+
+        self.animation_loop = 0
+        self.image = self.game.explosion_spritesheet.get_sprite(65,5, self.width, self.height)
+
+        self.rect = self.image.get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
+
+    def update(self):
+        if self.cronometro.tempo_passado() > 2:
+            self.animate()
+        self.collide_player()
+
+    def animate(self):
+        animations = [self.game.explosion_spritesheet.get_sprite(19,8, self.width, self.height),
+                      self.game.explosion_spritesheet.get_sprite(19,41, self.width, self.height),
+                      self.game.explosion_spritesheet.get_sprite(19,82, self.width, self.height),
+                      self.game.explosion_spritesheet.get_sprite(19,126, self.width, self.height),
+                      self.game.explosion_spritesheet.get_sprite(19,172, self.width, self.height),
+                      self.game.explosion_spritesheet.get_sprite(19,218, self.width, self.height)]
+
+        
+        self.image = animations[math.floor(self.animation_loop)]
+        self.animation_loop += 0.2
+        if self.animation_loop >= 6:
+            self.kill()
+
+    def collide_player(self):
+        pass
         
         
