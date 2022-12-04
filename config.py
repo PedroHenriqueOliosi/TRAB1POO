@@ -3,9 +3,10 @@ ALTURA = 480
 TILESIZE = 32
 FPS = 60
 
-PLAYER_LAYER = 4
-ENEMY_LAYER = 3
-BLOCK_LAYER = 2
+PLAYER_LAYER = 5
+ENEMY_LAYER = 4
+BLOCK_LAYER = 3
+WATER_LAYER = 2
 GROUND_LAYER = 1
 
 PLAYER_SPEED = 3
@@ -20,13 +21,13 @@ tilemap = [
     'BBBBBBBBBBBBBBBBBBBB',
     'B..E...............B',
     'B..................B',
-    'B..................B',
-    'B.....BBB....2.....B',
-    'B..................B',
-    'B..................B',
+    'B.....OOOOOO.......B',
+    'B.....OWWWWO.2.....B',
+    'B.....OWWWWO.......B',
+    'B.....OOOOOO.......B',
     'B........P.........B',
+    'B..................B',
     'B.........BBB......B',
-    'B...........B......B',
     'B...........B......B',
     'B..................B',
     'B............E.....B',

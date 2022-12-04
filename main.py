@@ -2,24 +2,15 @@ import pygame as pg
 from sprites import *
 from config import *
 import sys
-from time import time
+from cronometro import *
 
-class Cronometro:
-    def __init__(self):
-        self.reset()
-
-    def reset(self):
-        self.tempo_referencia = time()
-
-    def tempo_passado(self):
-        tempo_atual = time()
-        return tempo_atual - self.tempo_referencia
 
 class Game:
     def __init__ (self):
         pg.init()
         self.screen = pg.display.set_mode((LARGURA, ALTURA))
         self.clock = pg.time.Clock()
+        self.cronometro = Cronometro()
         self.running = True
         self.intro = True
         self.lore = True
@@ -30,7 +21,9 @@ class Game:
         self.terrain_spritesheet = Spritesheet('ibagens\Terrain.png')
         self.enemy_spritesheet = Spritesheet('ibagens\enemy.png')
         self.attack_spritesheet = Spritesheet('ibagens\Attack.png')
+        self.explosion_spritesheet = Spritesheet('ibagens\explosion.png')
         self.intro_background = pg.image.load('ibagens\introbackground.png')
+
 
     def createTilemap(self):
         for i, row in enumerate(tilemap):
@@ -38,6 +31,10 @@ class Game:
                 Ground(self, j, i)
                 if column == "B":
                     Block(self, j, i)
+                if column == "O":
+                    Obstacle(self, j, i)
+                if column == "W":
+                    Water(self, j, i)       
                 if column == "E":
                     Enemy(self, j, i)
                 if column == "P":
@@ -53,7 +50,10 @@ class Game:
             self.blocks = pg.sprite.LayeredUpdates()
             self.enemies = pg.sprite.LayeredUpdates()
             self.attacks = pg.sprite.LayeredUpdates()
-            self.fireballs = pg.sprite.LayeredUpdates()
+            self.explosion = pg.sprite.LayeredUpdates()
+            self.obstacle = pg.sprite.LayeredUpdates()
+            self.water = pg.sprite.LayeredUpdates()
+            
         
             self.createTilemap()
             
@@ -85,10 +85,15 @@ class Game:
                         Attack(self, self.player2.rect.x - TILESIZE, self.player2.rect.y, self.player2)
                     if self.player2.facing == 'right':
                         Attack(self, self.player2.rect.x + TILESIZE, self.player2.rect.y, self.player2)
+
+                if event.key == pg.K_e:
+                    Explosion(self, self.player2.rect.x, self.player2.rect.y, self.player)
+    
+                if event.key == pg.K_u:
+                    Explosion(self, self.player.rect.x, self.player.rect.y, self.player2)
     
     def update (self):
         self.all_sprites.update()
-        #o vscode deu problema quando botei "self.all_sprites.update()", achei muito esquisito
 
     def draw(self):
         self.screen.fill(BLACK)
