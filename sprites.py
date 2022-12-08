@@ -355,6 +355,30 @@ class Button:
             return False
         return False
 
+class Phrase:
+    
+    def __init__(self, x, y, width, height, content_color, content, fontsize):
+        self.font = pg.font.Font("ibagens\Fontinha_jogo.TTF", fontsize)
+
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.content = content
+        self.fg = content_color
+
+        self.image = pg.Surface((self.width, self.height))
+        self.image.fill(WHITE)
+        pg.Surface.set_colorkey(self.image, WHITE)
+        self.rect = self.image.get_rect()
+
+        self.rect.x = self.x
+        self.rect.y = self.y
+
+        self.text = self.font.render(self.content, True, self.fg)
+        self.text_rect = self.text.get_rect(center=(self.width/2, self.height/2))
+        self.image.blit(self.text, self.text_rect)
+
 class Attack(pg.sprite.Sprite):
     def __init__(self, game, x, y, player):
         self.game = game
