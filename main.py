@@ -21,6 +21,7 @@ class Game:
         self.terrain_spritesheet = Spritesheet('ibagens\Terrain.png')
         self.enemy_spritesheet = Spritesheet('ibagens\enemy.png')
         self.attack_spritesheet = Spritesheet('ibagens\Attack.png')
+        self.healthbar_spritesheet = Spritesheet('ibagens\healthbar.png')
         self.explosion_spritesheet = Spritesheet('ibagens\explosion.png')
         self.intro_background = pg.image.load('ibagens\introbackground.png')
         self.papiro = pg.image.load('ibagens\papiro.png')
@@ -39,10 +40,10 @@ class Game:
                 if column == "E":
                     Enemy(self, j, i)
                 if column == "P":
-                    self.player = Player(self, j, i)
+                    self.player = Player(self, j, i, 100)
                 if column == '2':
-                    self.player2 = Player2(self, j, i)
-
+                    self.player2 = Player2(self, j, i, 100)
+    
     def new(self):
 
             self.playing = True
@@ -51,6 +52,7 @@ class Game:
             self.blocks = pg.sprite.LayeredUpdates()
             self.enemies = pg.sprite.LayeredUpdates()
             self.attacks = pg.sprite.LayeredUpdates()
+            self.healthbar = pg.sprite.LayeredUpdates()
             self.explosion = pg.sprite.LayeredUpdates()
             self.obstacle = pg.sprite.LayeredUpdates()
             self.water = pg.sprite.LayeredUpdates()
@@ -60,6 +62,9 @@ class Game:
             
     def events(self):
         #game loop events
+        Phrase( self.player.rect.x, self.player.rect.y, TILESIZE, 5, BLACK, f'{self.player.health}', 10)
+        Phrase( self.player2.rect.x, self.player2.rect.y, TILESIZE, 5, BLACK, f'{self.player2.health}', 10)
+        
         for event in pg.event.get():
             keys = pg.key.get_pressed()
             if event.type == pg.QUIT or keys[pg.K_ESCAPE]:

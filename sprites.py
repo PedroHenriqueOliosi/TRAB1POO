@@ -4,6 +4,7 @@ from cronometro import *
 import math
 import random
 
+
 class Spritesheet:
     def __init__(self, file):
         self.sheet = pg.image.load(file).convert()
@@ -16,11 +17,12 @@ class Spritesheet:
         return sprite
 
 class Player(pg.sprite.Sprite):
-    def __init__(self, game, x, y):
+    def __init__(self, game, x, y, health):
 
         self.game = game
+        self.health = health
         self._layer = PLAYER_LAYER
-        self.groups = self.game.all_sprites
+        self.groups = self.game.all_sprites, self.game.healthbar
         pg.sprite.Sprite.__init__(self, self.groups)
 
         self.x = x * TILESIZE
@@ -28,25 +30,24 @@ class Player(pg.sprite.Sprite):
         self.width = TILESIZE
         self.height = TILESIZE
 
-        #temporary variables that will store the mov change every loop
         self.x_change = 0
         self.y_change = 0
 
-        #orientation of the player
         self.facing = 'down'
         self.animation_loop = 1
 
         self.image = self.game.enemy_spritesheet.get_sprite(3,2, self.width, self.height)
-
+        
         self.rect = self.image.get_rect()
         self.rect.x = self.x
         self.rect.y = self.y
 
     def update(self):
         self.movement()
-        self.animate()
+        self.animate_player()
         self.collide_enemies()
         self.collide_water()
+        # self.healthbar()
 
         self.rect.x += self.x_change
         self.collide_blocks('x')
@@ -106,7 +107,8 @@ class Player(pg.sprite.Sprite):
                 if self.x_change > 0:
                     self.rect.x = hits[0].rect.left - self.rect.width
                 if self.x_change < 0:
-                    self.rect.x = hits[0].rect.right 
+                    self.rect.x = hits[0].rect.right
+                
 
         if direction == 'y':
             hits = pg.sprite.spritecollide(self, self.game.blocks, False)
@@ -114,24 +116,24 @@ class Player(pg.sprite.Sprite):
                 if self.y_change > 0:
                     self.rect.y = hits[0].rect.top - self.rect.width
                 if self.y_change < 0:
-                    self.rect.y = hits[0].rect.bottom    
+                    self.rect.y = hits[0].rect.bottom      
 
     def collide_obstacle(self, direction):
         if direction == 'x':
-            hits = pg.sprite.spritecollide(self, self.game.obstacle, False) 
+            hits = pg.sprite.spritecollide(self, self.game.blocks, False) 
             if hits:
                 if self.x_change > 0:
                     self.rect.x = hits[0].rect.left - self.rect.width
                 if self.x_change < 0:
-                    self.rect.x = hits[0].rect.right 
-
+                    self.rect.x = hits[0].rect.right
+                
         if direction == 'y':
-            hits = pg.sprite.spritecollide(self, self.game.obstacle, False)
+            hits = pg.sprite.spritecollide(self, self.game.blocks, False)
             if hits:
                 if self.y_change > 0:
                     self.rect.y = hits[0].rect.top - self.rect.width
                 if self.y_change < 0:
-                    self.rect.y = hits[0].rect.bottom    
+                    self.rect.y = hits[0].rect.bottom  
 
     def collide_water(self):
         hits = pg.sprite.spritecollide(self, self.game.water, False)
@@ -141,7 +143,7 @@ class Player(pg.sprite.Sprite):
             self.y_change = self.y_change//3
             print(self.speed)
 
-    def animate(self):
+    def animate_player(self):
         down_animations = [self.game.character_spritesheet.get_sprite(3, 2, self.width, self.height),
                            self.game.character_spritesheet.get_sprite(35, 2, self.width, self.height),
                            self.game.character_spritesheet.get_sprite(68, 2, self.width, self.height)]
@@ -194,9 +196,14 @@ class Player(pg.sprite.Sprite):
                 if self.animation_loop >= 3:
                     self.animation_loop = 1
 
+    # def healthbar(self):
+    #     self.vida = Phrase( self.x, self.y, self.width, self.height, BLACK, f'{self.health}', 10)
+        
+
+
 class Player2(Player):
-    def __init__(self, game, x, y):
-        super().__init__(game, x, y)
+    def __init__(self, game, x, y, health):
+        super().__init__(game, x, y, health)
 
     def movement(self):
         self.speed = PLAYER_SPEED
@@ -364,6 +371,7 @@ class Phrase:
 
         self.x = x
         self.y = y
+        self._layer = PLAYER_LAYER
         self.width = width
         self.height = height
         self.content = content
@@ -566,7 +574,6 @@ class Explosion(pg.sprite.Sprite):
     def update(self):
         if self.cronometro.tempo_passado() > 2:
             self.animate()
-        self.collide_player()
 
     def animate(self):
         animations = [self.game.explosion_spritesheet.get_sprite(19,8, self.width, self.height),
@@ -582,7 +589,3 @@ class Explosion(pg.sprite.Sprite):
         if self.animation_loop >= 6:
             self.kill()
 
-    def collide_player(self):
-        pass
-        
-        
