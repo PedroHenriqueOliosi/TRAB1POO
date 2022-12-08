@@ -137,6 +137,8 @@ class Player(pg.sprite.Sprite):
         hits = pg.sprite.spritecollide(self, self.game.water, False)
         if hits:
             self.speed = 1
+            self.x_change = self.x_change//3
+            self.y_change = self.y_change//3
             print(self.speed)
 
     def animate(self):
