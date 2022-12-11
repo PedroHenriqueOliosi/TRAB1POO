@@ -1,4 +1,5 @@
 import pygame as pg
+from time import time
 from sprites import *
 from config import *
 import sys
@@ -18,6 +19,12 @@ class Game:
         self.little_font = pg.font.Font("ibagens\Fontinha_jogo.TTF", 14)
 
         self.character_spritesheet = Spritesheet('ibagens\character.png')
+        self.character_2_spritesheet = Spritesheet('ibagens\character.png')
+        self.enemy_spritesheet = Spritesheet('ibagens\enemy.png')
+        self.mouro_spritesheet = Spritesheet('ibagens\Mouro.png')
+        self.berbere_spritesheet = Spritesheet('ibagens\Berbere.png')
+        self.andaluz_spritesheet = Spritesheet('ibagens\Andaluz.png')
+        self.visigodo_spritesheet = Spritesheet('ibagens\Visigodo.png')
         self.terrain_spritesheet = Spritesheet('ibagens\Terrain.png')
         self.enemy_spritesheet = Spritesheet('ibagens\enemy.png')
         self.attack_spritesheet = Spritesheet('ibagens\Attack.png')
@@ -139,7 +146,8 @@ class Game:
             if play_button.is_pressed(mouse_pos, mouse_pressed):
                 self.intro = False
                 self.lore = False
-                self.new()
+                self.selection_screen_1()
+
             if lore_button.is_pressed(mouse_pos, mouse_pressed):
                 self.lore = True
                 self.intro = False
@@ -211,10 +219,205 @@ class Game:
             self.clock.tick(FPS)
             pg.display.update()
 
+    def selection_screen_1 (self):
+        
+        self.animation_loop = 1
+        self.selection_1 = True
+        self.selection_2 = False
+
+        self.visigodo_1 = False
+        self.andaluz_1 = False
+        self.berbere_1 = False
+        self.mouro_1 = False
+
+        title = self.font.render('1- Escolha seu char', True, BLACK)
+        title_rect = title.get_rect(x=10, y=10)
+
+        for i in range (300):
+            self.animation_loop += 0.1
+            if self.animation_loop >= 3:
+                self.animation_loop = 1
+
+        visigodo_button = Button(LARGURA*0.15, ALTURA*0.6, 200, 50, WHITE, BLACK, 'Visigodo', 18)
+        visigodo_select_animation = [self.visigodo_spritesheet.get_sprite(3, 2, TILESIZE, TILESIZE),
+                           self.visigodo_spritesheet.get_sprite(35, 2, TILESIZE, TILESIZE),
+                           self.visigodo_spritesheet.get_sprite(68, 2, TILESIZE, TILESIZE)]
+        self.visigodo_animation = visigodo_select_animation[math.floor(self.animation_loop)]
+
+        andaluz_button = Button(LARGURA*0.15, ALTURA*0.3, 200, 50, WHITE, BLACK, 'Andaluz', 18)
+        andaluz_select_animation = [self.andaluz_spritesheet.get_sprite(3, 2, TILESIZE, TILESIZE),
+                           self.andaluz_spritesheet.get_sprite(35, 2, TILESIZE, TILESIZE),
+                           self.andaluz_spritesheet.get_sprite(68, 2, TILESIZE, TILESIZE)]
+        self.andaluz_animation = andaluz_select_animation[math.floor(self.animation_loop)]
+
+        berbere_button = Button(LARGURA*0.5, ALTURA*0.6, 200, 50, WHITE, BLACK, 'Berbere', 18)
+        berbere_select_animation = [self.berbere_spritesheet.get_sprite(3, 2, TILESIZE, TILESIZE),
+                           self.berbere_spritesheet.get_sprite(35, 2, TILESIZE, TILESIZE),
+                           self.berbere_spritesheet.get_sprite(68, 2, TILESIZE, TILESIZE)]
+        self.berbere_animation = berbere_select_animation[math.floor(self.animation_loop)]
+
+        mouro_button = Button(LARGURA*0.5, ALTURA*0.3, 200, 50, WHITE, BLACK, 'Mouro', 18)
+        mouro_select_animation = [self.mouro_spritesheet.get_sprite(3, 2, TILESIZE, TILESIZE),
+                           self.mouro_spritesheet.get_sprite(35, 2, TILESIZE, TILESIZE),
+                           self.mouro_spritesheet.get_sprite(68, 2, TILESIZE, TILESIZE)]
+        self.mouro_animation = mouro_select_animation[math.floor(self.animation_loop)]
+
+
+        while self.selection_1:
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    self.selection_screen_1 = False
+                    self.running = False
+                    sys.exit(0)
+            
+            mouse_pos = pg.mouse.get_pos()
+            mouse_pressed = pg.mouse.get_pressed()
+            pg.time.delay(100)
+
+            if visigodo_button.is_pressed(mouse_pos, mouse_pressed):
+                print("iu")
+                self.character_spritesheet = Spritesheet('ibagens\Visigodo.png')
+                self.visigodo_1 = True
+                self.selection_2 = True
+                self.selection_1 = False
+                self.selection_screen_2()
+            
+            if andaluz_button.is_pressed(mouse_pos, mouse_pressed):
+                self.character_spritesheet = Spritesheet('ibagens\Andaluz.png')
+                self.andaluz_1 = True
+                self.selection_2 = True
+                self.selection_1 = False
+                self.selection_screen_2()
+            
+            if berbere_button.is_pressed(mouse_pos, mouse_pressed):
+                self.character_spritesheet = Spritesheet('ibagens\Berbere.png')
+                self.berbere_1 = True
+                self.selection_2 = True
+                self.selection_1 = False
+                self.selection_screen_2()
+            
+            if mouro_button.is_pressed(mouse_pos, mouse_pressed):
+                self.character_spritesheet = Spritesheet('ibagens\Mouro.png')
+                self.mouro_1 = True
+                self.selection_2 = True
+                self.selection_1 = False
+                self.selection_screen_2()
+
+            self.screen.blit(self.intro_background, (0,0))
+            self.screen.blit(title, title_rect)
+            self.screen.blit(visigodo_button.image, visigodo_button.rect)
+            self.screen.blit(andaluz_button.image, andaluz_button.rect)
+            self.screen.blit(berbere_button.image, berbere_button.rect)
+            self.screen.blit(mouro_button.image, mouro_button.rect)
+            self.screen.blit(self.visigodo_animation, (LARGURA*0.28, ALTURA*0.42))
+            self.screen.blit(self.andaluz_animation, (LARGURA*0.28, ALTURA*0.72))
+            self.screen.blit(self.berbere_animation, (LARGURA*0.61, ALTURA*0.42))
+            self.screen.blit(self.mouro_animation, (LARGURA*0.61, ALTURA*0.72))
+
+            self.clock.tick(FPS)
+            pg.display.update()
+
+
+    def selection_screen_2 (self):
+        
+        self.animation_loop = 1
+
+        self.visigodo_2 = False
+        self.andaluz_2 = False
+        self.berbere_2 = False
+        self.mouro_2 = False
+
+        title = self.font.render('2- Escolha seu char', True, BLACK)
+        title_rect = title.get_rect(x=10, y=10)
+
+        for i in range (300):
+            self.animation_loop += 0.1
+            if self.animation_loop >= 3:
+                self.animation_loop = 1
+
+        visigodo_button = Button(LARGURA*0.15, ALTURA*0.6, 200, 50, WHITE, BLACK, 'Visigodo', 18)
+        visigodo_select_animation = [self.visigodo_spritesheet.get_sprite(3, 2, TILESIZE, TILESIZE),
+                           self.visigodo_spritesheet.get_sprite(35, 2, TILESIZE, TILESIZE),
+                           self.visigodo_spritesheet.get_sprite(68, 2, TILESIZE, TILESIZE)]
+        self.visigodo_animation = visigodo_select_animation[math.floor(self.animation_loop)]
+
+        andaluz_button = Button(LARGURA*0.15, ALTURA*0.3, 200, 50, WHITE, BLACK, 'Andaluz', 18)
+        andaluz_select_animation = [self.andaluz_spritesheet.get_sprite(3, 2, TILESIZE, TILESIZE),
+                           self.andaluz_spritesheet.get_sprite(35, 2, TILESIZE, TILESIZE),
+                           self.andaluz_spritesheet.get_sprite(68, 2, TILESIZE, TILESIZE)]
+        self.andaluz_animation = andaluz_select_animation[math.floor(self.animation_loop)]
+
+        berbere_button = Button(LARGURA*0.5, ALTURA*0.6, 200, 50, WHITE, BLACK, 'Berbere', 18)
+        berbere_select_animation = [self.berbere_spritesheet.get_sprite(3, 2, TILESIZE, TILESIZE),
+                           self.berbere_spritesheet.get_sprite(35, 2, TILESIZE, TILESIZE),
+                           self.berbere_spritesheet.get_sprite(68, 2, TILESIZE, TILESIZE)]
+        self.berbere_animation = berbere_select_animation[math.floor(self.animation_loop)]
+
+        mouro_button = Button(LARGURA*0.5, ALTURA*0.3, 200, 50, WHITE, BLACK, 'Mouro', 18)
+        mouro_select_animation = [self.mouro_spritesheet.get_sprite(3, 2, TILESIZE, TILESIZE),
+                           self.mouro_spritesheet.get_sprite(35, 2, TILESIZE, TILESIZE),
+                           self.mouro_spritesheet.get_sprite(68, 2, TILESIZE, TILESIZE)]
+        self.mouro_animation = mouro_select_animation[math.floor(self.animation_loop)]
+
+
+        while self.selection_2:
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    self.selection_screen_2 = False
+                    self.running = False
+                    sys.exit(0)
+            
+            mouse_pos = pg.mouse.get_pos()
+            mouse_pressed = pg.mouse.get_pressed()
+
+            if visigodo_button.is_pressed(mouse_pos, mouse_pressed):
+                self.character_2_spritesheet = Spritesheet('ibagens\Visigodo.png')
+                self.visigodo_2 = True
+                self.selection_2 = False
+                self.selection_1 = False
+                self.new()
+            
+            if andaluz_button.is_pressed(mouse_pos, mouse_pressed):
+                self.character_2_spritesheet = Spritesheet('ibagens\Andaluz.png')
+                self.andaluz_2 = True
+                self.selection_2 = False
+                self.selection_1 = False
+                self.new()
+            
+            if berbere_button.is_pressed(mouse_pos, mouse_pressed):
+                self.character_2_spritesheet = Spritesheet('ibagens\Berbere.png')
+                self.berbere_2 = True
+                self.selection_2 = False
+                self.selection_1 = False
+                self.new()
+            
+            if mouro_button.is_pressed(mouse_pos, mouse_pressed):
+                self.character_2_spritesheet = Spritesheet('ibagens\Mouro.png')
+                self.mouro_2 = True
+                self.selection_2 = False
+                self.selection_1 = False
+                self.new()
+
+            self.screen.blit(self.intro_background, (0,0))
+            self.screen.blit(title, title_rect)
+            self.screen.blit(visigodo_button.image, visigodo_button.rect)
+            self.screen.blit(andaluz_button.image, andaluz_button.rect)
+            self.screen.blit(berbere_button.image, berbere_button.rect)
+            self.screen.blit(mouro_button.image, mouro_button.rect)
+            self.screen.blit(self.visigodo_animation, (LARGURA*0.28, ALTURA*0.42))
+            self.screen.blit(self.andaluz_animation, (LARGURA*0.28, ALTURA*0.72))
+            self.screen.blit(self.berbere_animation, (LARGURA*0.61, ALTURA*0.42))
+            self.screen.blit(self.mouro_animation, (LARGURA*0.61, ALTURA*0.72))
+
+            self.clock.tick(FPS)
+            pg.display.update()
+
 g = Game()
 g.intro_screen()
 if g.lore:
     g.lore_screen()
+if g.selection_1:
+    g.selection_screen_1()
 
 g.new()
 while g.running:

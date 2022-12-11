@@ -14,23 +14,22 @@ ENEMY_SPEED = 2
 
 RED = (255, 0, 0)
 BLACK = (0, 0, 0)
-GREEN = (0,255,0)
 BLUE = (0, 0, 255)
 WHITE = (255, 255, 255)
 
 tilemap = [
     'BBBBBBBBBBBBBBBBBBBB',
     'B..E...............B',
-    'B..............2...B',
+    'B...........P......B',
     'B..................B',
     'B........OOOOOOO...B',
-    'B.....OOOOWWWWWO....B',
-    'B.....BWWWWWW.O....B',
+    'B.....OOOOWWWWWO...B',
+    'B.....BWWWWWWWO....B',
     'B.....BWWWWWWO.....B',
     'B.....BOWWWWO......B',
-    'B..........OO......B',
+    'B......OOOOOO......B',
     'B.........BBB......B',
-    'B.....P.....B......B',
+    'B...2.......B......B',
     'B..................B',
     'B............E.....B',
     'BBBBBBBBBBBBBBBBBBBB',
