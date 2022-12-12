@@ -18,18 +18,26 @@ class Game:
         self.font = pg.font.Font("ibagens\Fonte_jogo.TTF", 34)
         self.little_font = pg.font.Font("ibagens\Fontinha_jogo.TTF", 14)
 
+        #personagens
         self.character_spritesheet = Spritesheet('ibagens\character.png')
         self.character_2_spritesheet = Spritesheet('ibagens\character.png')
-        self.enemy_spritesheet = Spritesheet('ibagens\enemy.png')
         self.mouro_spritesheet = Spritesheet('ibagens\Mouro.png')
         self.berbere_spritesheet = Spritesheet('ibagens\Berbere.png')
         self.andaluz_spritesheet = Spritesheet('ibagens\Andaluz.png')
         self.visigodo_spritesheet = Spritesheet('ibagens\Visigodo.png')
-        self.terrain_spritesheet = Spritesheet('ibagens\Terrain.png')
         self.enemy_spritesheet = Spritesheet('ibagens\enemy.png')
+
+        #terrenos
+        self.terrain_spritesheet = Spritesheet('ibagens\Terrain.png')
+
+        #ataques
         self.attack_spritesheet = Spritesheet('ibagens\Attack.png')
-        self.healthbar_spritesheet = Spritesheet('ibagens\healthbar.png')
+        self.arrow_spritesheet = Spritesheet('ibagens\Andaluz.png')
+        self.auto_heal_spritesheet = Spritesheet('ibagens\Visigodo.png')
         self.explosion_spritesheet = Spritesheet('ibagens\explosion.png')
+        self.healthbar_spritesheet = Spritesheet('ibagens\healthbar.png')
+
+        #cenas
         self.intro_background = pg.image.load('ibagens\introbackground.png')
         self.papiro = pg.image.load('ibagens\papiro.png')
         self.papiro = pg.transform.scale(self.papiro, (580, 451))
@@ -43,14 +51,14 @@ class Game:
                 if column == "O":
                     Obstacle(self, j, i)
                 if column == "W":
-                    Water(self, j, i)       
-                if column == "E":
-                    Enemy(self, j, i)
+                    Water(self, j, i)
                 if column == "P":
                     self.player = Player(self, j, i, 100)
                 if column == '2':
-                    self.player2 = Player2(self, j, i, 100)
-    
+                    self.player2 = Player2(self, j, i, 100)  
+                if column == "E":
+                    Enemy(self, j, i)
+                
     def new(self):
 
             self.playing = True
@@ -63,7 +71,8 @@ class Game:
             self.explosion = pg.sprite.LayeredUpdates()
             self.obstacle = pg.sprite.LayeredUpdates()
             self.water = pg.sprite.LayeredUpdates()
-            
+            self.arrow = pg.sprite.LayeredUpdates()
+            self.Auto_heal = pg.sprite.LayeredUpdates()
         
             self.createTilemap()
             
@@ -82,13 +91,13 @@ class Game:
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_q:
                     if self.player.facing == 'up':
-                        Attack(self, self.player.rect.x, self.player.rect.y - TILESIZE, self.player)
+                        Auto_heal(self, self.player.rect.x, self.player.rect.y, self.player, 'up')
                     if self.player.facing == 'down':
-                        Attack(self, self.player.rect.x, self.player.rect.y + TILESIZE, self.player)
+                        Auto_heal(self, self.player.rect.x, self.player.rect.y, self.player, 'down')
                     if self.player.facing == 'left':
-                        Attack(self, self.player.rect.x - TILESIZE, self.player.rect.y, self.player)
+                        Auto_heal(self, self.player.rect.x, self.player.rect.y, self.player, 'left')
                     if self.player.facing == 'right':
-                        Attack(self, self.player.rect.x + TILESIZE, self.player.rect.y, self.player)
+                        Auto_heal(self, self.player.rect.x, self.player.rect.y, self.player, 'right')
                 
                 if event.key == pg.K_SPACE:
                     if self.player2.facing == 'up':
@@ -275,7 +284,6 @@ class Game:
             pg.time.delay(100)
 
             if visigodo_button.is_pressed(mouse_pos, mouse_pressed):
-                print("iu")
                 self.character_spritesheet = Spritesheet('ibagens\Visigodo.png')
                 self.visigodo_1 = True
                 self.selection_2 = True
@@ -309,10 +317,10 @@ class Game:
             self.screen.blit(andaluz_button.image, andaluz_button.rect)
             self.screen.blit(berbere_button.image, berbere_button.rect)
             self.screen.blit(mouro_button.image, mouro_button.rect)
-            self.screen.blit(self.visigodo_animation, (LARGURA*0.28, ALTURA*0.42))
-            self.screen.blit(self.andaluz_animation, (LARGURA*0.28, ALTURA*0.72))
-            self.screen.blit(self.berbere_animation, (LARGURA*0.61, ALTURA*0.42))
-            self.screen.blit(self.mouro_animation, (LARGURA*0.61, ALTURA*0.72))
+            self.screen.blit(self.visigodo_animation, (LARGURA*0.28, ALTURA*0.72))
+            self.screen.blit(self.andaluz_animation, (LARGURA*0.28, ALTURA*0.42))
+            self.screen.blit(self.berbere_animation, (LARGURA*0.61, ALTURA*0.72))
+            self.screen.blit(self.mouro_animation, (LARGURA*0.61, ALTURA*0.42))
 
             self.clock.tick(FPS)
             pg.display.update()
@@ -404,10 +412,10 @@ class Game:
             self.screen.blit(andaluz_button.image, andaluz_button.rect)
             self.screen.blit(berbere_button.image, berbere_button.rect)
             self.screen.blit(mouro_button.image, mouro_button.rect)
-            self.screen.blit(self.visigodo_animation, (LARGURA*0.28, ALTURA*0.42))
-            self.screen.blit(self.andaluz_animation, (LARGURA*0.28, ALTURA*0.72))
-            self.screen.blit(self.berbere_animation, (LARGURA*0.61, ALTURA*0.42))
-            self.screen.blit(self.mouro_animation, (LARGURA*0.61, ALTURA*0.72))
+            self.screen.blit(self.visigodo_animation, (LARGURA*0.28, ALTURA*0.72))
+            self.screen.blit(self.andaluz_animation, (LARGURA*0.28, ALTURA*0.42))
+            self.screen.blit(self.berbere_animation, (LARGURA*0.61, ALTURA*0.72))
+            self.screen.blit(self.mouro_animation, (LARGURA*0.61, ALTURA*0.42))
 
             self.clock.tick(FPS)
             pg.display.update()

@@ -55,6 +55,7 @@ class Player(pg.sprite.Sprite):
         self.collide_blocks('y')
         self.collide_obstacle('y')
 
+        self.pos = (self.rect.x, self.rect.y)
         self.x_change = 0
         self.y_change = 0
 
@@ -96,8 +97,7 @@ class Player(pg.sprite.Sprite):
     def collide_enemies(self):
         hits = pg.sprite.spritecollide(self, self.game.enemies, False)
         if hits:
-            self.kill()
-            self.game.playing = False
+            print('ee')
 
     def collide_blocks(self, direction):
         if direction == 'x':
@@ -194,6 +194,10 @@ class Player(pg.sprite.Sprite):
                 self.animation_loop += 0.1
                 if self.animation_loop >= 3:
                     self.animation_loop = 1
+
+    #def player_pos():
+        #Player.update(Player.self)
+        #pos_x = Player.update.rect_x
 
     # def healthbar(self):
     #     self.vida = Phrase( self.x, self.y, self.width, self.height, BLACK, f'{self.health}', 10)
@@ -308,16 +312,21 @@ class Enemy(pg.sprite.Sprite):
         self.width = TILESIZE
         self.height = TILESIZE
 
+        self.collide_down = False
+        self.collide_up = False
+        self.collide_right = False
+        self.collide_left = False
+
         self.x_change = 0
         self.y_change = 0
 
-        self.facing = random.choice(['left', 'right'])
+        self.facing = random.choice(['left', 'right', 'up', 'down'])
         self.animation_loop = 1
         self.movement_loop = 0
-        self.max_travel = random.randint(7, 30)
+        self.max_travel = random.randint(3, 7)
 
         self.image = self.game.enemy_spritesheet.get_sprite(3, 2, self.width, self.height)
-        self.image.set_colorkey(BLACK)
+        self.image.set_colorkey(WHITE)
 
         self.rect = self.image.get_rect()
         self.rect.x = self.x
@@ -326,27 +335,122 @@ class Enemy(pg.sprite.Sprite):
     def update(self):
         self.movement()
         self.animate()
-        
+        self.collide_water()
         self.rect.x += self.x_change
+        self.collide_blocks('x')
+        self.collide_obstacle('x')
         self.rect.y += self.y_change
+        self.collide_blocks('y')
+        self.collide_obstacle('y')
 
-        self.x_change = 0
-        self.y_change = 0
+        self.x_change = self.y_change = 0
+
+    def collide_blocks(self, direction):
+        if direction == 'x':
+            hits = pg.sprite.spritecollide(self, self.game.blocks, False) 
+            if hits:
+                if self.x_change > 0:
+                    self.rect.x = hits[0].rect.left - self.rect.width
+                    self.collide_right = True
+                if self.x_change < 0:
+                    self.rect.x = hits[0].rect.right
+                    self.collide_left = True
+                
+
+        if direction == 'y':
+            hits = pg.sprite.spritecollide(self, self.game.blocks, False)
+            if hits:
+                if self.y_change > 0:
+                    self.rect.y = hits[0].rect.top - self.rect.width
+                    self.collide_down = True
+                if self.y_change < 0:
+                    self.rect.y = hits[0].rect.bottom 
+                    self.collide_up = True
+
+    def collide_obstacle(self, direction):
+        if direction == 'x':
+            hits = pg.sprite.spritecollide(self, self.game.obstacle, False) 
+            if hits:
+                if self.x_change > 0:
+                    self.rect.x = hits[0].rect.left - self.rect.width
+                    self.collide_right = True
+                if self.x_change < 0:
+                    self.rect.x = hits[0].rect.right
+                    self.collide_left = True
+                
+        if direction == 'y':
+            hits = pg.sprite.spritecollide(self, self.game.obstacle, False)
+            if hits:
+                if self.y_change > 0:
+                    self.rect.y = hits[0].rect.top - self.rect.width
+                    self.collide_down = True
+                if self.y_change < 0:
+                    self.rect.y = hits[0].rect.bottom
+                    self.collide_up = True
+
+    def collide_water(self):
+        hits = pg.sprite.spritecollide(self, self.game.water, False)
+        if hits:
+            self.speed = 1
+            self.x_change = self.x_change//3
+            self.y_change = self.y_change//3
+            print(self.speed)
+            
+    def choose_direction(self):
+        if self.collide_left:
+            self.facing = random.choice(['right', 'up', 'down'])
+            self.collide_left = False
+
+        if self.collide_right:
+            self.facing = random.choice(['left', 'up', 'down'])
+            self.collide_right = False
+            
+        if self.collide_up:
+            self.facing = random.choice(['left', 'right', 'down'])
+            self.collide_up = False
+
+        if self.collide_down:
+            self.facing = random.choice(['left', 'right', 'up'])
+            self.collide_down = False
+
+        self.animation_loop = 1
+        self.movement_loop = 0
+        self.max_travel = random.randint(15, 30)
 
     def movement(self):
         if self.facing == 'left':
             self.x_change -= ENEMY_SPEED
             self.movement_loop -= 1
             if self.movement_loop <= -self.max_travel:
-                self.facing = 'right'
+                self.choose_direction()
 
         if self.facing == 'right':
             self.x_change += ENEMY_SPEED
             self.movement_loop += 1
             if self.movement_loop >= self.max_travel:
-                self.facing = 'left'
+                self.choose_direction()
+
+        if self.facing == 'up':
+            self.y_change -= ENEMY_SPEED
+            self.movement_loop -= 1
+            if self.movement_loop <= -self.max_travel:
+                self.choose_direction()
+
+        if self.facing == 'down':
+            self.y_change += ENEMY_SPEED
+            self.movement_loop += 1
+            if self.movement_loop <= self.max_travel:
+                self.choose_direction()
 
     def animate(self):
+        down_animations = [self.game.enemy_spritesheet.get_sprite(3, 2, self.width, self.height),
+                           self.game.enemy_spritesheet.get_sprite(35, 2, self.width, self.height),
+                           self.game.enemy_spritesheet.get_sprite(68, 2, self.width, self.height)]
+
+        up_animations = [self.game.enemy_spritesheet.get_sprite(3, 34, self.width, self.height),
+                         self.game.enemy_spritesheet.get_sprite(35, 34, self.width, self.height),
+                         self.game.enemy_spritesheet.get_sprite(68, 34, self.width, self.height)]
+
         left_animations = [self.game.enemy_spritesheet.get_sprite(3, 98, self.width, self.height),
                            self.game.enemy_spritesheet.get_sprite(35, 98, self.width, self.height),
                            self.game.enemy_spritesheet.get_sprite(68, 98, self.width, self.height)]
@@ -354,6 +458,25 @@ class Enemy(pg.sprite.Sprite):
         right_animations = [self.game.enemy_spritesheet.get_sprite(3, 66, self.width, self.height),
                             self.game.enemy_spritesheet.get_sprite(35, 66, self.width, self.height),
                             self.game.enemy_spritesheet.get_sprite(68, 66, self.width, self.height)]
+
+
+        if self.facing == 'down':
+            if self.y_change == 0:
+                self.image = self.game.enemy_spritesheet.get_sprite(3,2, self.width, self.height)
+            else:
+                self.image = down_animations[math.floor(self.animation_loop)]
+                self.animation_loop += 0.1
+                if self.animation_loop >= 3:
+                    self.animation_loop = 1
+
+        if self.facing == 'up':
+            if self.y_change == 0:
+                self.image = self.game.enemy_spritesheet.get_sprite(3,34, self.width, self.height)
+            else:
+                self.image = up_animations[math.floor(self.animation_loop)]
+                self.animation_loop += 0.1
+                if self.animation_loop >= 3:
+                    self.animation_loop = 1
 
         if self.facing == 'left':
             if self.x_change == 0:
@@ -372,6 +495,8 @@ class Enemy(pg.sprite.Sprite):
                 self.animation_loop += 0.1
                 if self.animation_loop >= 3:
                     self.animation_loop = 1
+        
+
 
 class Block(pg.sprite.Sprite):
     def __init__(self, game, x, y):
@@ -665,3 +790,249 @@ class Explosion(pg.sprite.Sprite):
         if self.animation_loop >= 6:
             self.kill()
 
+class Arrow(pg.sprite.Sprite):
+    def __init__(self, game, x, y, player, direction):
+        self.direction = direction
+
+        self.game = game
+        self._layer = PLAYER_LAYER
+        self.player = player
+        self.groups = self.game.all_sprites, self.game.arrow
+        pg.sprite.Sprite.__init__(self, self.groups)
+
+        self.x = x
+        self.y = y
+        self.width = TILESIZE 
+        self.height = TILESIZE
+
+        self.x_change = 0
+        self.y_change = 0
+        self.speed = 7
+
+        self.animation_loop = 0
+
+        self.image = self.game.andaluz_spritesheet.get_sprite(20, 130, self.width, self.height)
+
+        self.rect = self.image.get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
+
+
+    def update(self):
+        self.animate()
+        self.collide_enemies()
+        self.collide_obstacles()
+        self.collide_blocks()
+        self.animate()
+        self.rect.x += self.x_change
+        self.rect.y += self.y_change
+
+        self.x_change *= 0.8
+        self.y_change *= 0.8
+        self.speed *= 0.8
+    
+    def collide_enemies(self):
+        hits = pg.sprite.spritecollide(self, self.game.enemies, True)
+        if hits:
+            self.x_change = 0
+            self.y_change = 0
+            self.speed = 0
+    
+    def collide_obstacles(self):
+        hits = pg.sprite.spritecollide(self, self.game.obstacle, True)
+        if hits:
+            self.x_change = 0
+            self.y_change = 0
+            self.speed = 0
+                    
+    def collide_blocks(self):
+        hits = pg.sprite.spritecollide(self, self.game.blocks, False)
+        if hits:
+            self.x_change = 0
+            self.y_change = 0
+            self.speed = 0
+                    
+    def animate(self):
+        direction = self.game.player.facing
+        direction2 = self.game.player2.facing
+
+        right_animations = [self.game.andaluz_spritesheet.get_sprite(20, 130, self.width, self.height)]
+
+        down_animations = [self.game.andaluz_spritesheet.get_sprite(82, 138, self.width, self.height)]
+
+        left_animations = [self.game.andaluz_spritesheet.get_sprite(20, 156, self.width, self.height)]
+
+        up_animations = [self.game.andaluz_spritesheet.get_sprite(63, 138, self.width, self.height)]
+        
+        if self.player == self.game.player:
+            if self.direction == 'up':
+                self.y_change -= self.speed
+                self.image = up_animations[0]
+                self.animation_loop += 1
+                if self.animation_loop >= 45:
+                    self.kill()
+            
+            if self.direction == 'down':
+                self.y_change += self.speed
+                self.image = down_animations[0]
+                self.animation_loop += 1
+                if self.animation_loop >= 45:
+                    self.kill()
+
+            if self.direction == 'left':
+                self.x_change -= self.speed
+                self.image = left_animations[0]
+                self.animation_loop += 1
+                if self.animation_loop >= 45:
+                    self.kill()
+
+            if self.direction == 'right':
+                self.x_change += self.speed
+                self.image = right_animations[0]
+                self.animation_loop += 1
+                if self.animation_loop >= 45:
+                    self.kill()
+        
+        if self.player == self.game.player2:
+            if direction2 == 'up':
+                self.y_change += self.speed
+                self.image = up_animations[0]
+                self.animation_loop += 1
+                if self.animation_loop >= 45:
+                    self.kill()
+            
+            if direction2 == 'down':
+                self.image = down_animations[0]
+                self.animation_loop += 1
+                if self.animation_loop >= 45:
+                    self.kill()
+
+            if direction2 == 'left':
+                self.image = left_animations[0]
+                self.animation_loop += 1
+                if self.animation_loop >= 45:
+                    self.kill()
+
+            if direction2 == 'right':
+                self.image = right_animations[0]
+                self.animation_loop += 1
+                if self.animation_loop >= 45:
+                    self.kill()
+
+    def movement(self):
+        if self.direction == 'up':
+            pass
+
+class Auto_heal(pg.sprite.Sprite):
+    def __init__(self, game, x, y, player, direction):
+        self.direction = direction
+
+        self.game = game
+        self._layer = PLAYER_LAYER
+        self.player = player
+        self.groups = self.game.all_sprites, self.game.Auto_heal
+        pg.sprite.Sprite.__init__(self, self.groups)
+
+        self.x = x
+        self.y = y
+        self.width = TILESIZE 
+        self.height = TILESIZE
+
+        self.x_change = 0
+        self.y_change = 0
+        self.speed = 0
+
+        self.animation_loop = 0
+
+        self.image = self.game.visigodo_spritesheet.get_sprite(280, 90, self.width, self.height)
+
+        self.rect = self.image.get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
+
+    def update(self):
+        self.animate()
+        self.collide_enemies()
+        self.rect.x += self.x_change
+        self.rect.y += self.y_change
+    
+    def collide_enemies(self):
+        hits = pg.sprite.spritecollide(self, self.game.enemies, True)
+    
+    def animate(self):
+        direction = self.game.player.facing
+        direction2 = self.game.player2.facing
+
+        right_animations = [self.game.visigodo_spritesheet.get_sprite(131,11, self.width, self.height),
+                      self.game.visigodo_spritesheet.get_sprite(170,11, self.width, self.height),
+                      self.game.visigodo_spritesheet.get_sprite(209,12, self.width, self.height)]
+
+        down_animations = [self.game.visigodo_spritesheet.get_sprite(126,50, self.width, self.height),
+                      self.game.visigodo_spritesheet.get_sprite(163,50, self.width, self.height),
+                      self.game.visigodo_spritesheet.get_sprite(202,50, self.width, self.height)]
+
+        left_animations = [self.game.visigodo_spritesheet.get_sprite(127,89, self.width, self.height),
+                      self.game.visigodo_spritesheet.get_sprite(163,89, self.width, self.height),
+                      self.game.visigodo_spritesheet.get_sprite(200,90, self.width, self.height)]
+
+        up_animations = [self.game.visigodo_spritesheet.get_sprite(127,130, self.width, self.height),
+                      self.game.visigodo_spritesheet.get_sprite(166,130, self.width, self.height),
+                      self.game.visigodo_spritesheet.get_sprite(205,130, self.width, self.height)]
+        
+        if self.player == self.game.player:
+            if self.direction == 'up':
+                self.y_change = 0
+                self.image = up_animations[math.floor(self.animation_loop)]
+                self.animation_loop += 0.1
+                if self.animation_loop >= 3:
+                    self.kill()
+        
+            if self.direction == 'down':
+                self.y_change = 0
+                self.image = down_animations[math.floor(self.animation_loop)]
+                self.animation_loop += 0.1
+                if self.animation_loop >= 3:
+                    self.kill()
+
+            if self.direction == 'left':
+                self.x_change = 0
+                self.image = left_animations[math.floor(self.animation_loop)]
+                self.animation_loop += 0.1
+                if self.animation_loop >= 3:
+                    self.kill()
+
+            if self.direction == 'right':
+                self.x_change = 0
+                self.image = right_animations[math.floor(self.animation_loop)]
+                self.animation_loop += 0.1
+                if self.animation_loop >= 3:
+                    self.kill()
+        
+        if self.player == self.game.player2:
+            if direction2 == 'up':
+                self.y_change = 0
+                self.image = up_animations[math.floor(self.animation_loop)]
+                self.animation_loop += 0.1
+                if self.animation_loop >= 3:
+                    self.kill()
+            
+            if direction2 == 'down':
+                self.y_change = 0
+                self.image = down_animations[math.floor(self.animation_loop)]
+                self.animation_loop += 0.1
+                if self.animation_loop >= 3:
+                    self.kill()
+
+            if direction2 == 'left':
+                self.x_change = 0
+                self.image = left_animations[math.floor(self.animation_loop)]
+                self.animation_loop += 0.1
+                if self.animation_loop >= 3:
+                    self.kill()
+
+            if direction2 == 'right':
+                self.x_change = 0
+                self.image = right_animations[math.floor(self.animation_loop)]
+                self.animation_loop += 0.1
+                if self.animation_loop >= 3:
+                    self.kill()
