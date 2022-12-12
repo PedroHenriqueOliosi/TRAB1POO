@@ -1,5 +1,5 @@
 LARGURA = 640
-ALTURA = 480
+ALTURA = 544
 TILESIZE = 32
 FPS = 60
 
@@ -23,14 +23,16 @@ tilemap = [
     'B...........E......B',
     'B..................B',
     'B........OOOOOOO...B',
-    'B....OBBBBWWWWWO...B',
-    'B...OWWWWWWWWWO....B',
-    'B...BWWWWWWWWWO....B',
-    'B.....BWOWWWWWO....B',
-    'B.....OOOOOOOO.....B',
+    'B.....OOOOWWWWWO...B',
+    'B.....BWWWWWWWO....B',
+    'B.....BWWWWWWO.....B',
+    'B.....BOWWWWO......B',
+    'B......OOOOOO......B',
     'B.........BBB......B',
     'B...2.......B......B',
     'B..................B',
     'B............E.....B',
     'BBBBBBBBBBBBBBBBBBBB',
+    'p...................',
+    'l...................'
 ]

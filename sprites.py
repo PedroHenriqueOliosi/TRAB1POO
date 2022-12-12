@@ -16,12 +16,15 @@ class Spritesheet:
         return sprite
 
 class Player(pg.sprite.Sprite):
-    def __init__(self, game, x, y, health):
+    def __init__(self, game, x, y, health, damage):
 
         self.game = game
-        self.health = health
+        self.maximum_health = health
+        self.current_health = 0
+        self.current_health += self.maximum_health
+        self.damage = damage
         self._layer = PLAYER_LAYER
-        self.groups = self.game.all_sprites, self.game.healthbar
+        self.groups = self.game.all_sprites, self.game.character
         pg.sprite.Sprite.__init__(self, self.groups)
 
         self.x = x * TILESIZE
@@ -41,12 +44,54 @@ class Player(pg.sprite.Sprite):
         self.rect.x = self.x
         self.rect.y = self.y
 
+    def get_damage(self, damage):
+        if self.current_health > 0:
+            self.current_health -= damage
+        if self.current_health <= 0:
+            self.current_health = 0
+            self.game.playing = False
+
+    def get_health(self, damage):
+        if self.current_health < self.maximum_health:
+            self.current_health += damage
+        if self.current_health >= self.maximum_health:
+            self.current_health = self.maximum_health
+
+    def collide_attack(self):
+        hits = pg.sprite.spritecollide(self, self.game.attacks, False)
+        if hits:
+            self.get_damage(self.damage)
+            print(self.current_health)
+    
+    def collide_explosion(self):
+        hits = pg.sprite.spritecollide(self, self.game.explosion, False)
+        if hits:
+            self.get_damage(self.damage)
+            print(self.current_health)
+
+    def collide_arrow(self):
+        hits = pg.sprite.spritecollide(self, self.game.arrow, False)
+        if hits:
+            self.get_damage(self.damage)
+            print(self.current_health)
+
+    def auto_heal(self):
+        hits = pg.sprite.spritecollide(self, self.game.Auto_heal, False)
+        if hits:
+            self.get_health(self.damage)
+            print(self.current_health)
+
+
+
     def update(self):
         self.movement()
         self.animate_player()
+        self.collide_attack()
+        self.collide_explosion()
+        self.collide_arrow()
+        self.auto_heal()
         self.collide_enemies()
         self.collide_water()
-        # self.healthbar()
 
         self.rect.x += self.x_change
         self.collide_blocks('x')
@@ -55,7 +100,6 @@ class Player(pg.sprite.Sprite):
         self.collide_blocks('y')
         self.collide_obstacle('y')
 
-        self.pos = (self.rect.x, self.rect.y)
         self.x_change = 0
         self.y_change = 0
 
@@ -97,7 +141,9 @@ class Player(pg.sprite.Sprite):
     def collide_enemies(self):
         hits = pg.sprite.spritecollide(self, self.game.enemies, False)
         if hits:
-            print('ee')
+            self.get_damage(self.damage)
+            print(self.current_health)
+       
 
     def collide_blocks(self, direction):
         if direction == 'x':
@@ -194,19 +240,11 @@ class Player(pg.sprite.Sprite):
                 self.animation_loop += 0.1
                 if self.animation_loop >= 3:
                     self.animation_loop = 1
-
-    #def player_pos():
-        #Player.update(Player.self)
-        #pos_x = Player.update.rect_x
-
-    # def healthbar(self):
-    #     self.vida = Phrase( self.x, self.y, self.width, self.height, BLACK, f'{self.health}', 10)
         
-
-
 class Player2(Player):
-    def __init__(self, game, x, y, health):
-        super().__init__(game, x, y, health)
+    def __init__(self, game, x, y, health, damage):
+        super().__init__(game, x, y, health, damage)
+        self.groups = self.game.all_sprites, self.game.character2
 
         self.image = self.game.character_2_spritesheet.get_sprite(3,2, self.width, self.height)
 
@@ -216,10 +254,45 @@ class Player2(Player):
         self.rect = self.image.get_rect()
         self.rect.x = self.x
         self.rect.y = self.y
-    
+
+    def collide_enemies(self):
+        hits = pg.sprite.spritecollide(self, self.game.enemies, False)
+        if hits:
+            self.get_damage(self.damage)
+            print(self.current_health)
+
+    def collide_attack(self):
+        hits = pg.sprite.spritecollide(self, self.game.attacks, False)
+        if hits:
+            self.get_damage(self.damage)
+            print(self.current_health)
+
+    def collide_explosion(self):
+        hits = pg.sprite.spritecollide(self, self.game.explosion, False)
+        if hits:
+            self.get_damage(self.damage)
+            print(self.current_health)
+
+    def collide_arrow(self):
+        hits = pg.sprite.spritecollide(self, self.game.arrow, False)
+        if hits:
+            self.get_damage(self.damage)
+            print(self.current_health)
+
+    def auto_heal(self):
+        hits = pg.sprite.spritecollide(self, self.game.Auto_heal, False)
+        if hits:
+            self.get_health(self.damage)
+            print(self.current_health)
+
     def update(self):
         self.movement()
         self.animate_player()
+        self.collide_attack()
+        self.collide_enemies()
+        self.collide_explosion()
+        self.collide_arrow()
+        self.auto_heal()
         self.collide_enemies()
         self.collide_water()
         
@@ -336,6 +409,7 @@ class Enemy(pg.sprite.Sprite):
         self.movement()
         self.animate()
         self.collide_water()
+        
         self.rect.x += self.x_change
         self.collide_blocks('x')
         self.collide_obstacle('x')
@@ -343,8 +417,8 @@ class Enemy(pg.sprite.Sprite):
         self.collide_blocks('y')
         self.collide_obstacle('y')
 
-        self.x_change = self.y_change = 0
-
+        self.x_change = 0
+        self.y_change = 0
     def collide_blocks(self, direction):
         if direction == 'x':
             hits = pg.sprite.spritecollide(self, self.game.blocks, False) 
@@ -417,6 +491,7 @@ class Enemy(pg.sprite.Sprite):
         self.movement_loop = 0
         self.max_travel = random.randint(15, 30)
 
+
     def movement(self):
         if self.facing == 'left':
             self.x_change -= ENEMY_SPEED
@@ -450,7 +525,7 @@ class Enemy(pg.sprite.Sprite):
         up_animations = [self.game.enemy_spritesheet.get_sprite(3, 34, self.width, self.height),
                          self.game.enemy_spritesheet.get_sprite(35, 34, self.width, self.height),
                          self.game.enemy_spritesheet.get_sprite(68, 34, self.width, self.height)]
-
+        
         left_animations = [self.game.enemy_spritesheet.get_sprite(3, 98, self.width, self.height),
                            self.game.enemy_spritesheet.get_sprite(35, 98, self.width, self.height),
                            self.game.enemy_spritesheet.get_sprite(68, 98, self.width, self.height)]
@@ -495,8 +570,6 @@ class Enemy(pg.sprite.Sprite):
                 self.animation_loop += 0.1
                 if self.animation_loop >= 3:
                     self.animation_loop = 1
-        
-
 
 class Block(pg.sprite.Sprite):
     def __init__(self, game, x, y):
@@ -567,9 +640,11 @@ class Button:
 
 class Phrase:
     
-    def __init__(self, x, y, width, height, content_color, content, fontsize):
+    def __init__(self, game, x, y, width, height, content_color, content, fontsize):
         self.font = pg.font.Font("ibagens\Fontinha_jogo.TTF", fontsize)
 
+        self.game = game
+        self._layer = PLAYER_LAYER
         self.x = x
         self.y = y
         self._layer = PLAYER_LAYER
@@ -592,6 +667,7 @@ class Phrase:
 
 class Attack(pg.sprite.Sprite):
     def __init__(self, game, x, y, player):
+    
         self.game = game
         self._layer = PLAYER_LAYER
         self.player = player
@@ -615,7 +691,7 @@ class Attack(pg.sprite.Sprite):
         self.animate()
         self.collide_enemies()
         self.collide_obstacles()
-            
+
     def collide_enemies(self):
         hits_enemies = pg.sprite.spritecollide(self, self.game.enemies, True)
     
@@ -895,25 +971,28 @@ class Arrow(pg.sprite.Sprite):
         
         if self.player == self.game.player2:
             if direction2 == 'up':
-                self.y_change += self.speed
+                self.y_change -= self.speed
                 self.image = up_animations[0]
                 self.animation_loop += 1
                 if self.animation_loop >= 45:
                     self.kill()
             
             if direction2 == 'down':
+                self.y_change += self.speed
                 self.image = down_animations[0]
                 self.animation_loop += 1
                 if self.animation_loop >= 45:
                     self.kill()
 
             if direction2 == 'left':
+                self.x_change -= self.speed
                 self.image = left_animations[0]
                 self.animation_loop += 1
                 if self.animation_loop >= 45:
                     self.kill()
 
             if direction2 == 'right':
+                self.x_change += self.speed
                 self.image = right_animations[0]
                 self.animation_loop += 1
                 if self.animation_loop >= 45:
@@ -960,24 +1039,23 @@ class Auto_heal(pg.sprite.Sprite):
         hits = pg.sprite.spritecollide(self, self.game.enemies, True)
     
     def animate(self):
-        direction = self.game.player.facing
-        direction2 = self.game.player2.facing
 
-        right_animations = [self.game.visigodo_spritesheet.get_sprite(131,11, self.width, self.height),
-                      self.game.visigodo_spritesheet.get_sprite(170,11, self.width, self.height),
-                      self.game.visigodo_spritesheet.get_sprite(209,12, self.width, self.height)]
+        right_animations = [self.game.visigodo_spritesheet.get_sprite(223,8, self.width, self.height),
+                      self.game.visigodo_spritesheet.get_sprite(263,8, self.width, self.height),
+                      self.game.visigodo_spritesheet.get_sprite(303,8, self.width, self.height)]
 
-        down_animations = [self.game.visigodo_spritesheet.get_sprite(126,50, self.width, self.height),
-                      self.game.visigodo_spritesheet.get_sprite(163,50, self.width, self.height),
-                      self.game.visigodo_spritesheet.get_sprite(202,50, self.width, self.height)]
+        down_animations = [self.game.visigodo_spritesheet.get_sprite(222,47, self.width, self.height),
+                      self.game.visigodo_spritesheet.get_sprite(258,47, self.width, self.height),
+                      self.game.visigodo_spritesheet.get_sprite(296,47, self.width, self.height)]
 
-        left_animations = [self.game.visigodo_spritesheet.get_sprite(127,89, self.width, self.height),
-                      self.game.visigodo_spritesheet.get_sprite(163,89, self.width, self.height),
-                      self.game.visigodo_spritesheet.get_sprite(200,90, self.width, self.height)]
+        left_animations = [self.game.visigodo_spritesheet.get_sprite(222,82, self.width, self.height),
+                      self.game.visigodo_spritesheet.get_sprite(257,82, self.width, self.height),
+                      self.game.visigodo_spritesheet.get_sprite(295,82, self.width, self.height)]
 
-        up_animations = [self.game.visigodo_spritesheet.get_sprite(127,130, self.width, self.height),
-                      self.game.visigodo_spritesheet.get_sprite(166,130, self.width, self.height),
-                      self.game.visigodo_spritesheet.get_sprite(205,130, self.width, self.height)]
+        up_animations = [self.game.visigodo_spritesheet.get_sprite(222,124, self.width, self.height),
+                      self.game.visigodo_spritesheet.get_sprite(258,124, self.width, self.height),
+                      self.game.visigodo_spritesheet.get_sprite(295,124, self.width, self.height)]
+        
         
         if self.player == self.game.player:
             if self.direction == 'up':
@@ -1009,30 +1087,114 @@ class Auto_heal(pg.sprite.Sprite):
                     self.kill()
         
         if self.player == self.game.player2:
-            if direction2 == 'up':
+            if self.direction == 'up':
                 self.y_change = 0
                 self.image = up_animations[math.floor(self.animation_loop)]
                 self.animation_loop += 0.1
                 if self.animation_loop >= 3:
                     self.kill()
-            
-            if direction2 == 'down':
+        
+            if self.direction == 'down':
                 self.y_change = 0
                 self.image = down_animations[math.floor(self.animation_loop)]
                 self.animation_loop += 0.1
                 if self.animation_loop >= 3:
                     self.kill()
 
-            if direction2 == 'left':
+            if self.direction == 'left':
                 self.x_change = 0
                 self.image = left_animations[math.floor(self.animation_loop)]
                 self.animation_loop += 0.1
                 if self.animation_loop >= 3:
                     self.kill()
 
-            if direction2 == 'right':
+            if self.direction == 'right':
                 self.x_change = 0
                 self.image = right_animations[math.floor(self.animation_loop)]
                 self.animation_loop += 0.1
                 if self.animation_loop >= 3:
                     self.kill()
+
+class Placar(pg.sprite.Sprite):
+    def __init__(self, game, x, y, player, max_health):
+        self.game = game
+        self.player = player
+        self.max_health = max_health
+        self._layer = PLAYER_LAYER
+        self.groups = self.game.all_sprites
+        pg.sprite.Sprite.__init__(self, self.groups)
+
+        self.x = x * TILESIZE
+        self.y = y * TILESIZE
+        self.width = 100
+        self.height = TILESIZE
+
+        self.animation_loop = 0
+        self.image = self.game.character_spritesheet.get_sprite(111, 2, self.width, self.height)
+
+        self.rect = self.image.get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
+    
+    def update(self):
+        self.animate()
+    
+    def animate(self):
+        health = self.game.player.current_health
+        
+        animations = [self.game.character_spritesheet.get_sprite(111, 2, self.width, self.height),
+                      self.game.character_spritesheet.get_sprite(111, 34, self.width, self.height),
+                      self.game.character_spritesheet.get_sprite(111, 66, self.width, self.height),
+                      self.game.character_spritesheet.get_sprite(111, 98, self.width, self.height),
+                      self.game.character_spritesheet.get_sprite(111, 130, self.width, self.height),
+                      self.game.character_spritesheet.get_sprite(111, 162, self.width, self.height)]
+        
+        
+        
+        if self.player == self.game.player:
+            if health == self.max_health:
+                self.image = animations[0]
+            if health <= 0.83 * self.max_health:
+                self.image = animations[1]
+            if health <= 0.66 * self.max_health:
+                self.image = animations[2]
+            if health <= 0.5 * self.max_health:
+                self.image = animations[3]
+            if health <= 0.33 * self.max_health:
+                self.image = animations[4]
+            if health <= 0.17 * self.max_health:
+                self.image = animations[5]
+       
+
+class Placar2(Placar):
+    def __init__(self, game, x, y, player,max_health):
+        super().__init__(game, x, y, player,max_health)
+
+        self.image = self.game.character_2_spritesheet.get_sprite(111, 2, self.width, self.height)
+
+    def animate(self):
+        health = self.game.player2.current_health
+        
+        animations = [self.game.character_2_spritesheet.get_sprite(111, 2, self.width, self.height),
+                        self.game.character_2_spritesheet.get_sprite(111, 33, self.width, self.height),
+                        self.game.character_2_spritesheet.get_sprite(111, 66, self.width, self.height),
+                        self.game.character_2_spritesheet.get_sprite(111, 99, self.width, self.height),
+                        self.game.character_2_spritesheet.get_sprite(111, 133, self.width, self.height),
+                        self.game.character_2_spritesheet.get_sprite(111, 165, self.width, self.height)]
+
+        if self.player == self.game.player2:
+            if health == self.max_health:
+                self.image = animations[0]
+            if health <= 0.83 * self.max_health:
+                self.image = animations[1]
+            if health <= 0.66 * self.max_health:
+                self.image = animations[2]
+            if health <= 0.5 * self.max_health:
+                self.image = animations[3]
+            if health <= 0.33 * self.max_health:
+                self.image = animations[4]
+            if health <= 0.17 * self.max_health:
+                self.image = animations[5]
+
+    def update(self):
+        self.animate()

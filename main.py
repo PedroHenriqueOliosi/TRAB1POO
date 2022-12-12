@@ -21,22 +21,19 @@ class Game:
         #personagens
         self.character_spritesheet = Spritesheet('ibagens\character.png')
         self.character_2_spritesheet = Spritesheet('ibagens\character.png')
+        self.enemy_spritesheet = Spritesheet('ibagens\enemy.png')
         self.mouro_spritesheet = Spritesheet('ibagens\Mouro.png')
-        self.berbere_spritesheet = Spritesheet('ibagens\Berbere.png')
+        self.berbere_spritesheet = Spritesheet('ibagens\Berbero.png')
         self.andaluz_spritesheet = Spritesheet('ibagens\Andaluz.png')
         self.visigodo_spritesheet = Spritesheet('ibagens\Visigodo.png')
-        self.enemy_spritesheet = Spritesheet('ibagens\enemy.png')
-
+        
         #terrenos
         self.terrain_spritesheet = Spritesheet('ibagens\Terrain.png')
-
+        
         #ataques
         self.attack_spritesheet = Spritesheet('ibagens\Attack.png')
-        self.arrow_spritesheet = Spritesheet('ibagens\Andaluz.png')
-        self.auto_heal_spritesheet = Spritesheet('ibagens\Visigodo.png')
         self.explosion_spritesheet = Spritesheet('ibagens\explosion.png')
-        self.healthbar_spritesheet = Spritesheet('ibagens\healthbar.png')
-
+        
         #cenas
         self.intro_background = pg.image.load('ibagens\introbackground.png')
         self.papiro = pg.image.load('ibagens\papiro.png')
@@ -51,19 +48,25 @@ class Game:
                 if column == "O":
                     Obstacle(self, j, i)
                 if column == "W":
-                    Water(self, j, i)
-                if column == "P":
-                    self.player = Player(self, j, i, 100)
-                if column == '2':
-                    self.player2 = Player2(self, j, i, 100)  
+                    Water(self, j, i)       
                 if column == "E":
                     Enemy(self, j, i)
-                
+                if column == "P":
+                    self.player = Player(self, j, i, 100, 0.2)
+                if column == '2':
+                    self.player2 = Player2(self, j, i, 100, 0.2)
+                if column == 'p':
+                    Placar(self, j, i, self.player, self.player.maximum_health)
+                if column == 'l':
+                    Placar2(self, j, i, self.player2, self.player2.maximum_health)
+    
     def new(self):
 
             self.playing = True
 
             self.all_sprites = pg.sprite.LayeredUpdates()
+            self.character = pg.sprite.LayeredUpdates()
+            self.character2 = pg.sprite.LayeredUpdates()
             self.blocks = pg.sprite.LayeredUpdates()
             self.enemies = pg.sprite.LayeredUpdates()
             self.attacks = pg.sprite.LayeredUpdates()
@@ -73,14 +76,11 @@ class Game:
             self.water = pg.sprite.LayeredUpdates()
             self.arrow = pg.sprite.LayeredUpdates()
             self.Auto_heal = pg.sprite.LayeredUpdates()
+            
         
             self.createTilemap()
             
     def events(self):
-        #game loop events
-        Phrase( self.player.rect.x, self.player.rect.y, TILESIZE, 5, BLACK, f'{self.player.health}', 10)
-        Phrase( self.player2.rect.x, self.player2.rect.y, TILESIZE, 5, BLACK, f'{self.player2.health}', 10)
-        
         for event in pg.event.get():
             keys = pg.key.get_pressed()
             if event.type == pg.QUIT or keys[pg.K_ESCAPE]:
@@ -89,32 +89,131 @@ class Game:
                 sys.exit(0)
                 
             if event.type == pg.KEYDOWN:
-                if event.key == pg.K_q:
-                    if self.player.facing == 'up':
-                        Auto_heal(self, self.player.rect.x, self.player.rect.y, self.player, 'up')
-                    if self.player.facing == 'down':
-                        Auto_heal(self, self.player.rect.x, self.player.rect.y, self.player, 'down')
-                    if self.player.facing == 'left':
-                        Auto_heal(self, self.player.rect.x, self.player.rect.y, self.player, 'left')
-                    if self.player.facing == 'right':
-                        Auto_heal(self, self.player.rect.x, self.player.rect.y, self.player, 'right')
-                
-                if event.key == pg.K_SPACE:
-                    if self.player2.facing == 'up':
-                        Attack(self, self.player2.rect.x, self.player2.rect.y - TILESIZE, self.player2)
-                    if self.player2.facing == 'down':
-                        Attack(self, self.player2.rect.x, self.player2.rect.y + TILESIZE, self.player2)
-                    if self.player2.facing == 'left':
-                        Attack(self, self.player2.rect.x - TILESIZE, self.player2.rect.y, self.player2)
-                    if self.player2.facing == 'right':
-                        Attack(self, self.player2.rect.x + TILESIZE, self.player2.rect.y, self.player2)
+                if self.visigodo_1 == True:
+                    if event.key == pg.K_q:
+                        if self.player.facing == 'up':
+                            Attack(self, self.player.rect.x, self.player.rect.y - TILESIZE, self.player)
+                        if self.player.facing == 'down':
+                            Attack(self, self.player.rect.x, self.player.rect.y + TILESIZE, self.player)
+                        if self.player.facing == 'left':
+                            Attack(self, self.player.rect.x - TILESIZE, self.player.rect.y, self.player)
+                        if self.player.facing == 'right':
+                            Attack(self, self.player.rect.x + TILESIZE, self.player.rect.y, self.player)
 
-                if event.key == pg.K_e:
-                    Explosion(self, self.player2.rect.x, self.player2.rect.y, self.player)
-    
-                if event.key == pg.K_u:
-                    Explosion(self, self.player.rect.x, self.player.rect.y, self.player2)
-    
+                    if event.key == pg.K_e:
+                        if self.player.facing == 'up':
+                            Auto_heal(self, self.player.rect.x, self.player.rect.y, self.player, 'up')
+                        if self.player.facing == 'down':
+                            Auto_heal(self, self.player.rect.x, self.player.rect.y, self.player, 'down')
+                        if self.player.facing == 'left':
+                            Auto_heal(self, self.player.rect.x, self.player.rect.y, self.player, 'left')
+                        if self.player.facing == 'right':
+                            Auto_heal(self, self.player.rect.x, self.player.rect.y, self.player, 'right')
+
+                if self.berbere_1 == True:
+                    if event.key == pg.K_q:
+                        if self.player.facing == 'up':
+                            Arrow(self, self.player.rect.x, self.player.rect.y - TILESIZE, self.player, 'up')
+                        if self.player.facing == 'down':
+                            Arrow(self, self.player.rect.x, self.player.rect.y + TILESIZE, self.player, 'down')
+                        if self.player.facing == 'left':
+                            Arrow(self, self.player.rect.x - TILESIZE, self.player.rect.y, self.player, 'left')
+                        if self.player.facing == 'right':
+                            Arrow(self, self.player.rect.x + TILESIZE, self.player.rect.y, self.player, 'right')
+                    
+                    if event.key == pg.K_e:
+                        Explosion(self, self.player2.rect.x, self.player2.rect.y, self.player)
+                
+                if self.andaluz_1 == True:
+                    if event.key == pg.K_q:
+                        if self.player.facing == 'up':
+                            Arrow(self, self.player.rect.x, self.player.rect.y - TILESIZE, self.player, 'up')
+                        if self.player.facing == 'down':
+                            Arrow(self, self.player.rect.x, self.player.rect.y + TILESIZE, self.player, 'down')
+                        if self.player.facing == 'left':
+                            Arrow(self, self.player.rect.x - TILESIZE, self.player.rect.y, self.player, 'left')
+                        if self.player.facing == 'right':
+                            Arrow(self, self.player.rect.x + TILESIZE, self.player.rect.y, self.player, 'right')
+                    
+                    if event.key == pg.K_e:
+                        Explosion(self, self.player2.rect.x, self.player2.rect.y, self.player)
+                
+                if self.mouro_1 == True:
+                    if event.key == pg.K_q:
+                        if self.player.facing == 'up':
+                            Attack(self, self.player.rect.x, self.player.rect.y - TILESIZE, self.player)
+                        if self.player.facing == 'down':
+                            Attack(self, self.player.rect.x, self.player.rect.y + TILESIZE, self.player)
+                        if self.player.facing == 'left':
+                            Attack(self, self.player.rect.x - TILESIZE, self.player.rect.y, self.player)
+                        if self.player.facing == 'right':
+                            Attack(self, self.player.rect.x + TILESIZE, self.player.rect.y, self.player)
+                    
+                    if event.key == pg.K_e:
+                        Explosion(self, self.player2.rect.x, self.player2.rect.y, self.player)
+
+                if self.visigodo_2 == True:
+                    if event.key == pg.K_u:
+                        if self.player2.facing == 'up':
+                            Attack(self, self.player2.rect.x, self.player2.rect.y - TILESIZE, self.player2)
+                        if self.player2.facing == 'down':
+                            Attack(self, self.player2.rect.x, self.player2.rect.y + TILESIZE, self.player2)
+                        if self.player2.facing == 'left':
+                            Attack(self, self.player2.rect.x - TILESIZE, self.player2.rect.y, self.player2)
+                        if self.player2.facing == 'right':
+                            Attack(self, self.player2.rect.x + TILESIZE, self.player2.rect.y, self.player2)
+
+                    if event.key == pg.K_o:
+                        if self.player2.facing == 'up':
+                            Auto_heal(self, self.player2.rect.x, self.player2.rect.y, self.player2, 'up')
+                        if self.player2.facing == 'down':
+                            Auto_heal(self, self.player2.rect.x, self.player2.rect.y, self.player2, 'down')
+                        if self.player2.facing == 'left':
+                            Auto_heal(self, self.player2.rect.x, self.player2.rect.y, self.player2, 'left')
+                        if self.player2.facing == 'right':
+                            Auto_heal(self, self.player2.rect.x, self.player2.rect.y, self.player2, 'right')
+
+                if self.berbere_2 == True:
+                    if event.key == pg.K_u:
+                        if self.player2.facing == 'up':
+                            Arrow(self, self.player2.rect.x, self.player2.rect.y - TILESIZE, self.player2, 'up')
+                        if self.player2.facing == 'down':
+                            Arrow(self, self.player2.rect.x, self.player2.rect.y + TILESIZE, self.player2, 'down')
+                        if self.player2.facing == 'left':
+                            Arrow(self, self.player2.rect.x - TILESIZE, self.player2.rect.y, self.player2, 'left')
+                        if self.player2.facing == 'right':
+                            Arrow(self, self.player2.rect.x + TILESIZE, self.player2.rect.y, self.player2, 'right')
+                    
+                    if event.key == pg.K_o:
+                        Explosion(self, self.player.rect.x, self.player.rect.y, self.player2)
+                
+                if self.andaluz_2 == True:
+                    if event.key == pg.K_u:
+                        if self.player2.facing == 'up':
+                            Arrow(self, self.player2.rect.x, self.player2.rect.y - TILESIZE, self.player2, 'up')
+                        if self.player2.facing == 'down':
+                            Arrow(self, self.player2.rect.x, self.player2.rect.y + TILESIZE, self.player2, 'down')
+                        if self.player2.facing == 'left':
+                            Arrow(self, self.player2.rect.x - TILESIZE, self.player2.rect.y, self.player2, 'left')
+                        if self.player2.facing == 'right':
+                            Arrow(self, self.player2.rect.x + TILESIZE, self.player2.rect.y, self.player2, 'right')
+                    
+                    if event.key == pg.K_o:
+                        Explosion(self, self.player.rect.x, self.player.rect.y, self.player2)
+                
+                if self.mouro_2 == True:
+                    if event.key == pg.K_u:
+                        if self.player2.facing == 'up':
+                            Attack(self, self.player2.rect.x, self.player2.rect.y - TILESIZE, self.player2)
+                        if self.player2.facing == 'down':
+                            Attack(self, self.player2.rect.x, self.player2.rect.y + TILESIZE, self.player2)
+                        if self.player2.facing == 'left':
+                            Attack(self, self.player2.rect.x - TILESIZE, self.player2.rect.y, self.player2)
+                        if self.player2.facing == 'right':
+                            Attack(self, self.player2.rect.x + TILESIZE, self.player2.rect.y, self.player2)
+                    
+                    if event.key == pg.K_o:
+                        Explosion(self, self.player.rect.x, self.player.rect.y, self.player2)
     def update (self):
         self.all_sprites.update()
 
@@ -284,6 +383,7 @@ class Game:
             pg.time.delay(100)
 
             if visigodo_button.is_pressed(mouse_pos, mouse_pressed):
+                print("iu")
                 self.character_spritesheet = Spritesheet('ibagens\Visigodo.png')
                 self.visigodo_1 = True
                 self.selection_2 = True
@@ -298,7 +398,7 @@ class Game:
                 self.selection_screen_2()
             
             if berbere_button.is_pressed(mouse_pos, mouse_pressed):
-                self.character_spritesheet = Spritesheet('ibagens\Berbere.png')
+                self.character_spritesheet = Spritesheet('ibagens\Berbero.png')
                 self.berbere_1 = True
                 self.selection_2 = True
                 self.selection_1 = False
@@ -393,7 +493,7 @@ class Game:
                 self.new()
             
             if berbere_button.is_pressed(mouse_pos, mouse_pressed):
-                self.character_2_spritesheet = Spritesheet('ibagens\Berbere.png')
+                self.character_2_spritesheet = Spritesheet('ibagens\Berbero.png')
                 self.berbere_2 = True
                 self.selection_2 = False
                 self.selection_1 = False
